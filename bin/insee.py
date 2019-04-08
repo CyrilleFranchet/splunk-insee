@@ -431,7 +431,10 @@ class INSEECommand(GeneratingCommand):
                 new_siret['SIGLE'] = v(u['sigleUniteLegale'])
                 new_siret['NOM'] = v(u['nomUniteLegale'])
                 new_siret['PRENOM'] = v(u['prenom1UniteLegale'])
-                new_siret['CIVILITE'] = v(u['sexeUniteLegale'])
+                if v(u['sexeUniteLegale']) == 'F':
+                    new_siret['CIVILITE'] = 2
+                elif v(u['sexeUniteLegale']) == 'M':
+                    new_siret['CIVILITE'] = 1
                 new_siret['RNA'] = v(u['identifiantAssociationUniteLegale'])
                 new_siret['NICSIEGE'] = v(u['nicSiegeUniteLegale'])
                 if siret['etablissementSiege']:
