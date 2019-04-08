@@ -563,7 +563,7 @@ class INSEECommand(GeneratingCommand):
         try:
             with open('./configuration_json.txt', 'r') as conf_file:
                 conf = json.load(conf_file)
-        except json.JSONDecodeError:
+        except ValueError:
             self.logger.error('  invalid JSON configuration file')
             exit(1)
         except IOError:
