@@ -353,36 +353,49 @@ class INSEECommand(GeneratingCommand):
 
                 new_siret['SIREN'] = v(siret['siren'])
                 new_siret['NIC'] = v(siret['nic'])
-                #new_siret['L1_NORMALISEE'] = v(a['complementAdresseEtablissement'])
-                new_siret['L1_NORMALISEE'] = v(u['denominationUniteLegale'])
+                # Physical person
+                if v(u['categorieJuridiqueUniteLegale']) == '1000':
+                    if v(u['sexeUniteLegale']):
+                        sul = v(u['sexeUniteLegale'])
+                        if sul == 'F':
+                            sul == 'MADAME'
+                        elif sul == 'M':
+                            sul == 'MONSIEUR'
+                    if v(u['nomUsageUniteLegale']):
+                        nul = v(u['nomUsageUniteLegale'])
+                    else:
+                        nul = v(u['nomUniteLegale'])
+                    puul = v(u['prenomUsuelUniteLegale'])
+                    new_siret['L1_NORMALISEE'] = ' '.join(filter(None, [sul, nul, puul]))
+                else:
+                    new_siret['L1_NORMALISEE'] = v(u['denominationUniteLegale'])
                 new_siret['L2_NORMALISEE'] = ''
                 nve = v(a['numeroVoieEtablissement'])
                 tve = v(a['typeVoieEtablissement'])
                 lve = v(a['libelleVoieEtablissement'])
                 new_siret['L3_NORMALISEE'] = ' '.join(filter(None, [nve, tve, lve]))
-                #new_siret['L4_NORMALISEE'] = ' '.join(filter(None, [nve, tve, lve]))
                 new_siret['L4_NORMALISEE'] = ''
                 new_siret['L5_NORMALISEE'] = ''
                 cpe = v(a['codePostalEtablissement'])
                 lce = v(a['libelleCommuneEtablissement'])
                 new_siret['L6_NORMALISEE'] = ' '.join(filter(None, [cpe, lce]))
-                if a['codePaysEtrangerEtablissement']:
-                    new_siret['L7_NORMALISEE'] = a['codePaysEtrangerEtablissement'].encode('utf-8')
+                if a['codePaysEtrangerEtablissement'] and a['libellePaysEtrangerEtablissement']:
+                    new_siret['L7_NORMALISEE'] = a['libellePaysEtrangerEtablissement'].encode('utf-8')
                 else:
                     new_siret['L7_NORMALISEE'] = 'FRANCE'.encode('utf-8')
-                new_siret['L1_DECLAREE'] = v(u['denominationUniteLegale'])
+                new_siret['L1_DECLAREE'] = new_siret['L1_NORMALISEE']
                 new_siret['L2_DECLAREE'] = ''
-                new_siret['L3_DECLAREE'] = ' '.join(filter(None, [nve, tve, lve]))
+                new_siret['L3_DECLAREE'] = new_siret['L3_NORMALISEE']
                 new_siret['L4_DECLAREE'] = ''
                 new_siret['L5_DECLAREE'] = ''
                 new_siret['L6_DECLAREE'] = ''
-                new_siret['L7_DECLAREE'] = ''
+                new_siret['L7_DECLAREE'] = new_siret['L7_NORMALISEE']
                 new_siret['NUMVOIE'] = v(a['numeroVoieEtablissement'])
                 new_siret['INDREP'] = v(a['indiceRepetitionEtablissement'])
                 new_siret['TYPVOIE'] = v(a['typeVoieEtablissement'])
                 new_siret['LIBVOIE'] = v(a['libelleVoieEtablissement'])
                 new_siret['CODPOS'] = v(a['codePostalEtablissement'])
-                new_siret['CEDEX'] = v(a['libelleCedexEtablissement'])
+                new_siret['CEDEX'] = v(a['codeCedexEtablissement'])
                 new_siret['RPET'] = ''
                 new_siret['LIBREG'] = ''
                 new_siret['DEPET'] = v(a['codeCommuneEtablissement'])[:2]
@@ -427,7 +440,21 @@ class INSEECommand(GeneratingCommand):
                 new_siret['PRODET'] = ''
                 new_siret['PRODPART'] = ''
                 new_siret['AUXILT'] = ''
-                new_siret['NOMEN_LONG'] = v(u['denominationUniteLegale'])
+                # Physical person
+                if v(u['categorieJuridiqueUniteLegale']) == '1000':
+                    nul = v(u['nomUniteLegale'])
+                    p1ul = v(u['prenom1UniteLegale'])
+                    p2ul = v(u['prenom2UniteLegale'])
+                    p3ul = v(u['prenom3UniteLegale'])
+                    p4ul = v(u['prenom4UniteLegale'])
+                    pul = ' '.join(filter(None, [p1ul, p2ul, p3ul, p4ul]))
+                    if v(u['nomUsageUniteLegale']):
+                        new_siret['NOMEN_LONG'] = nul + '*' + v(u['nomUsageUniteLegale']) + '/' + pul + '/'
+                    else:
+                        new_siret['NOMEN_LONG'] = nul + '*' + pul + '/'
+                else:
+                    new_siret['NOMEN_LONG'] = v(u['denominationUniteLegale'])
+
                 new_siret['SIGLE'] = v(u['sigleUniteLegale'])
                 new_siret['NOM'] = v(u['nomUniteLegale'])
                 new_siret['PRENOM'] = v(u['prenom1UniteLegale'])
@@ -443,7 +470,6 @@ class INSEECommand(GeneratingCommand):
                     else:
                         cce = v(a['codeCommuneEtablissement'])
                 else:
-                    #siege = self.get_etablissement_siege(v(siret['siren']), v(u['nicSiegeUniteLegale']))
                     siege = siret_siege[v(siret['siren'])+v(u['nicSiegeUniteLegale'])]
                     if v(siege['adresseEtablissement']['codePaysEtrangerEtablissement']):
                         cce = v(siege['adresseEtablissement']['codePaysEtrangerEtablissement'])
