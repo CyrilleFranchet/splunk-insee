@@ -36,7 +36,7 @@ from __future__ import absolute_import
 
 from io import BytesIO
 
-from splunklib import six
+from bin.splunklib import six
 try:
     import xml.etree.cElementTree as et
 except:
@@ -48,9 +48,9 @@ except ImportError:
     from .ordereddict import OrderedDict
 
 try:
-    from splunklib.six.moves import cStringIO as StringIO
+    from bin.splunklib import cStringIO as StringIO
 except:
-    from splunklib.six import StringIO
+    from bin.splunklib import StringIO
 
 __all__ = [
     "ResultsReader",

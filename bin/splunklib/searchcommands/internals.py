@@ -17,17 +17,17 @@
 from __future__ import absolute_import, division, print_function
 
 from collections import deque, namedtuple
-from splunklib import six
+from bin.splunklib import six
 try:
     from collections import OrderedDict  # must be python 2.7
 except ImportError:
     from ..ordereddict import OrderedDict
-from splunklib.six.moves import StringIO
+from bin.splunklib import StringIO
 from itertools import chain
-from splunklib.six.moves import map as imap
+from bin.splunklib import map as imap
 from json import JSONDecoder, JSONEncoder
 from json.encoder import encode_basestring_ascii as json_encode_string
-from splunklib.six.moves import urllib
+from bin.splunklib import urllib
 
 import csv
 import gzip
