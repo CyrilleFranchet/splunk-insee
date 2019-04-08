@@ -66,11 +66,11 @@ import socket
 from datetime import datetime, timedelta
 from time import sleep
 
-from bin.splunklib import six
-from bin.splunklib import urllib
+from splunklib import six
+from splunklib.six.moves import urllib
 
 from . import data
-from .binding import (Context, HTTPError, UrlEncoded,
+from .binding import (AuthenticationError, Context, HTTPError, UrlEncoded,
                       _encode, _make_cookie_header, _NoAuthenticationToken,
                       namespace)
 from .data import record
@@ -187,7 +187,7 @@ def _filter_content(content, *args):
     if len(args) > 0:
         return record((k, content[k]) for k in args)
     return record((k, v) for k, v in six.iteritems(content)
-                  if k not in ['eai:acl', 'eai:attributes', 'type'])
+        if k not in ['eai:acl', 'eai:attributes', 'type'])
 
 # Construct a resource path from the given base path + resource name
 def _path(base, name):

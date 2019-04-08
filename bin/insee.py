@@ -6,8 +6,7 @@ import time
 import requests
 from datetime import date, timedelta, datetime
 from requests.auth import HTTPBasicAuth
-from splunklib import \
-    dispatch, GeneratingCommand, Configuration, Option, six
+from splunklib import dispatch, GeneratingCommand, Configuration, Option, six
 from splunklib.searchcommands import validators
 from collections import OrderedDict
 import json
