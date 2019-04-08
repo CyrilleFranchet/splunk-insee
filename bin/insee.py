@@ -62,7 +62,7 @@ class INSEECommand(GeneratingCommand):
         elif r.status_code == 401:
             self.logger.error('  incorrect credentials : %s', r.json()['error_description'])
         else:
-            self.logger.error('  error during token retrieval')
+            self.logger.error('  error during token retrieval. Code received : %d' % r.status_code)
         exit(1)
 
     def get_status(self):
@@ -92,7 +92,7 @@ class INSEECommand(GeneratingCommand):
         elif r.status_code == 406:
             self.logger.error('  invalid Accept header in status request')
         else:
-            self.logger.error('  error during status retrieval')
+            self.logger.error('  error during status retrieval. Code received : %d' % r.status_code)
         return None
 
     def get_siret(self, q=None, nombre=None, curseur=None, champs=None, gzip=False):
@@ -139,8 +139,11 @@ class INSEECommand(GeneratingCommand):
             self.logger.error('  invalid Accept header in siret request')
         elif r.status_code == 414:
             self.logger.error('  siret request URI too long')
+        # TODO : many errors appear in log file
         else:
-            self.logger.error('  error during siret retrieval')
+            self.logger.error('  error during siret retrieval. Code received : %d' % r.status_code)
+            if self.debug:
+                self.logger.debug('  response %s' % r.text)
         exit(1)
 
     def get_updated_siret_records(self, date):
@@ -170,7 +173,7 @@ class INSEECommand(GeneratingCommand):
                 if self.debug:
                     self.logger.debug('  header siret %s', header)
             except KeyError as e:
-                self.logger.error('  data received by siret endpoint is not expected')
+                self.logger.error('  data received by siret endpoint is not expected : %s' % e)
                 exit(1)
 
         return updated_siret_list
@@ -190,7 +193,7 @@ class INSEECommand(GeneratingCommand):
             if self.debug:
                 self.logger.debug('  header siret %s', header)
         except KeyError as e:
-            self.logger.error('  data received by siret endpoint is not expected')
+            self.logger.error('  data received by siret endpoint is not expected : %s' % e)
             exit(1)
 
         return siret
@@ -222,7 +225,7 @@ class INSEECommand(GeneratingCommand):
                 if self.debug:
                     self.logger.debug('  header siret %s', header)
             except KeyError as e:
-                self.logger.error('  data received by siret endpoint is not expected')
+                self.logger.error('  data received by siret endpoint is not expected : %s' % e)
                 exit(1)
 
         return sieges
@@ -513,8 +516,11 @@ class INSEECommand(GeneratingCommand):
                 new_siret['MPRODEN'] = ''
                 new_siret['SIRETPS'] = ''
                 new_siret['TEL'] = ''
+            # TODO : too much errors are coming from there
             except KeyError as e:
-                self.logger.error('  data received by siret endpoint is not expected')
+                self.logger.error('  data received by siret endpoint is not expected : %s' % e)
+                if self.debug:
+                    self.logger.debug('  siret : %s', siret)
                 exit(1)
             
             #raw = ''.join(k+'='+'\'{0}\''.format(v)+' ' for k, v in new_siret.items())
