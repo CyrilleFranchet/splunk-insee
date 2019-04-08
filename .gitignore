@@ -1,4 +1,5 @@
 *.idea
 *.DS_Store*
 *.pyc
-bin/configuration_json.txt
+bin/configuration_json.tx
+Pipfile*
