@@ -357,9 +357,9 @@ class INSEECommand(GeneratingCommand):
                     if v(u['sexeUniteLegale']):
                         sul = v(u['sexeUniteLegale'])
                         if sul == 'F':
-                            sul == 'MADAME'
+                            sul = 'MADAME'
                         elif sul == 'M':
-                            sul == 'MONSIEUR'
+                            sul = 'MONSIEUR'
                     if v(u['nomUsageUniteLegale']):
                         nul = v(u['nomUsageUniteLegale'])
                     else:
@@ -453,7 +453,6 @@ class INSEECommand(GeneratingCommand):
                         new_siret['NOMEN_LONG'] = nul + '*' + pul + '/'
                 else:
                     new_siret['NOMEN_LONG'] = v(u['denominationUniteLegale'])
-
                 new_siret['SIGLE'] = v(u['sigleUniteLegale'])
                 new_siret['NOM'] = v(u['nomUniteLegale'])
                 new_siret['PRENOM'] = v(u['prenom1UniteLegale'])
