@@ -1,6 +1,0 @@
-{
-    "consumer_key": "my_key",
-    "consumer_secret": "my_secret",
-    "http_proxy": "http://@127.0.0.1:3128",
-    "https_proxy": "http://@127.0.0.1:3128"
-}
