@@ -366,7 +366,7 @@ class INSEECommand(GeneratingCommand):
                     else:
                         nul = v(u['nomUniteLegale'])
                     puul = v(u['prenomUsuelUniteLegale'])
-                    new_siret['L1_NORMALISEE'] = ' '.join(filter(None, [sul, nul, puul]))
+                    new_siret['L1_NORMALISEE'] = ' '.join(filter(None, [sul, puul, nul]))
                 else:
                     new_siret['L1_NORMALISEE'] = v(u['denominationUniteLegale'])
                 new_siret['L2_NORMALISEE'] = ''
