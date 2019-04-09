@@ -503,27 +503,28 @@ class INSEECommand(GeneratingCommand):
                         cce = v(a['codePaysEtrangerEtablissement'])
                     else:
                         cce = v(a['codeCommuneEtablissement'])
+                    department = cce[:3]
+                    rpen = ''
+                    for key, value in RPEN.items():
+                        if department in value:
+                            rpen = key
+                    if rpen == '':
+                        department = cce[:2]
+                        for key, value in RPEN.items():
+                            if department in value:
+                                rpen = key
                 else:
+                    rpen = ''
                     try:
                         siege = siret_siege[v(siret['siren'])+v(u['nicSiegeUniteLegale'])]
                     except KeyError as e:
                         self.logger.error('  siret %s has an invalid headquarter %s', \
                                           v(siret['siret']), v(siret['siren']) + v(u['nicSiegeUniteLegale']))
-                        continue
-                    if v(siege['adresseEtablissement']['codePaysEtrangerEtablissement']):
-                        cce = v(siege['adresseEtablissement']['codePaysEtrangerEtablissement'])
                     else:
-                        cce = v(siege['adresseEtablissement']['codeCommuneEtablissement'])
-                department = cce[:3]
-                rpen = ''
-                for key, value in RPEN.items():
-                    if department in value:
-                        rpen = key
-                if rpen == '':
-                    department = cce[:2]
-                    for key, value in RPEN.items():
-                        if department in value:
-                            rpen = key
+                        if v(siege['adresseEtablissement']['codePaysEtrangerEtablissement']):
+                            cce = v(siege['adresseEtablissement']['codePaysEtrangerEtablissement'])
+                        else:
+                            cce = v(siege['adresseEtablissement']['codeCommuneEtablissement'])
                 new_siret['RPEN'] = rpen
                 new_siret['DEPCOMEN'] = cce
                 new_siret['ADR_MAIL'] = ''
