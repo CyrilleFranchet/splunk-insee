@@ -161,9 +161,11 @@ class INSEECommand(GeneratingCommand):
         if r.status_code == 200:
             return r.json()
         elif r.status_code == 400:
-            self.logger.error('  invalid parameters in query : %s', r.json()['header']['message'])
+            self.logger.error('  invalid parameters in query: %s', r.json()['header']['message'])
         elif r.status_code == 401:
             self.logger.error('  invalid bearer token %s in siret request', self.bearer_token)
+        elif r.status_code == 404:
+            self.logger.error('  unknown siret: %s', r.json()['header']['message'])
         elif r.status_code == 406:
             self.logger.error('  invalid Accept header in siret request')
         elif r.status_code == 414:
