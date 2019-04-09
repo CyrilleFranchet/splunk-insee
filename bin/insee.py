@@ -202,7 +202,7 @@ class INSEECommand(GeneratingCommand):
                 if self.debug:
                     self.logger.debug('  header siret %s', header)
             except KeyError as e:
-                self.logger.error('  data received by siret endpoint is not expected : %s' % e)
+                self.logger.error('  missing key in response from API: %s' % e)
                 exit(1)
 
         return updated_siret_list
@@ -222,7 +222,7 @@ class INSEECommand(GeneratingCommand):
             if self.debug:
                 self.logger.debug('  header siret %s', header)
         except KeyError as e:
-            self.logger.error('  data received by siret endpoint is not expected : %s' % e)
+            self.logger.error('  missing key in response from API: %s' % e)
             exit(1)
 
         return siret
@@ -254,7 +254,7 @@ class INSEECommand(GeneratingCommand):
                 if self.debug:
                     self.logger.debug('  header siret %s', header)
             except KeyError as e:
-                self.logger.error('  data received by siret endpoint is not expected : %s' % e)
+                self.logger.error('  missing key in response from API: %s' % e)
                 exit(1)
 
         return sieges
@@ -347,7 +347,7 @@ class INSEECommand(GeneratingCommand):
                         self.logger.debug('  dateDernierTraitementMaximum %s',
                                           obj['dateDernierTraitementMaximum'].encode('utf-8'))
 
-        # Date to retrieve has been set. We need to check the format
+        # Date to retrieve has been set
         if self.dtr:
             day_before_yesterday = self.dtr
         # Day before yesterday
@@ -358,10 +358,6 @@ class INSEECommand(GeneratingCommand):
         updated_siret_list = self.get_updated_siret_records(day_before_yesterday)
         if self.debug:
             self.logger.debug('  retrieved %i siret to update', len(updated_siret_list))
-
-        # Ugly hack
-        #raw = ''.join(value + '="' + value + '" ' for value in csv_header)
-        #yield {'_time': time.time(), 'event_no': 1, '_raw': raw}
 
         siret_to_retrieve = list()
         for siret in updated_siret_list:
@@ -503,11 +499,16 @@ class INSEECommand(GeneratingCommand):
                     else:
                         cce = v(a['codeCommuneEtablissement'])
                 else:
-                    siege = siret_siege[v(siret['siren'])+v(u['nicSiegeUniteLegale'])]
-                    if v(siege['adresseEtablissement']['codePaysEtrangerEtablissement']):
-                        cce = v(siege['adresseEtablissement']['codePaysEtrangerEtablissement'])
-                    else:
-                        cce = v(siege['adresseEtablissement']['codeCommuneEtablissement'])
+                    try:
+                        siege = siret_siege[v(siret['siren'])+v(u['nicSiegeUniteLegale'])]
+                        if v(siege['adresseEtablissement']['codePaysEtrangerEtablissement']):
+                            cce = v(siege['adresseEtablissement']['codePaysEtrangerEtablissement'])
+                        else:
+                            cce = v(siege['adresseEtablissement']['codeCommuneEtablissement'])
+                    except KeyError as e:
+                        self.logger.error('  siret %s has an invalid headquarter %s',\
+                                          (siret, v(siret['siren'])+v(u['nicSiegeUniteLegale'])))
+                        continue
                 departement = cce[:3]
                 rpen = ''
                 for key, value in RPEN.items():
@@ -580,13 +581,12 @@ class INSEECommand(GeneratingCommand):
                 new_siret['TEL'] = ''
             # TODO : too much errors are coming from there
             except KeyError as e:
-                self.logger.error('  data received by siret endpoint is not expected : %s %s' % (e, e.message))
+                self.logger.error('  missing key in siret received from API: %s' % e)
                 if self.debug:
-                    self.logger.debug('  siret : %s', siret)
-                    self.logger.debug('  new_siret : %s', new_siret)
+                    self.logger.debug('  siret to update: %s', siret)
+                    self.logger.debug('  new_siret object: %s', new_siret)
                 exit(1)
             
-            #raw = ''.join(k+'='+'\'{0}\''.format(v)+' ' for k, v in new_siret.items())
             raw = ''.join(k+'='+'\"{0}\"'.format(v)+' ' for k, v in new_siret.items())
             event += 1
             yield {'_time': time.time(), 'event_no': event, '_raw': raw}
