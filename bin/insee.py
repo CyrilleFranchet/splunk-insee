@@ -13,8 +13,8 @@ import json
 
 
 class Date(validators.Validator):
-    """ Validates Date option values.
-
+    """
+        Validates Date option values.
     """
     def __call__(self, value):
         if value is None:
