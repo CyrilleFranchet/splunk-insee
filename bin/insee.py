@@ -371,6 +371,8 @@ class INSEECommand(GeneratingCommand):
 
         # We retrieve all headquarters
         siret_siege = self.get_etablissements_siege(siret_to_retrieve)
+        if self.debug:
+            self.logger.debug('  retrieved %i headquarter siret', len(siret_siege))
 
         event = 1
         # Parse the list of siret
@@ -578,7 +580,7 @@ class INSEECommand(GeneratingCommand):
                 new_siret['TEL'] = ''
             # TODO : too much errors are coming from there
             except KeyError as e:
-                self.logger.error('  data received by siret endpoint is not expected : %s %s' % e, e.message)
+                self.logger.error('  data received by siret endpoint is not expected : %s %s' % (e, e.message))
                 if self.debug:
                     self.logger.debug('  siret : %s', siret)
                 exit(1)
