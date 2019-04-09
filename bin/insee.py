@@ -10,6 +10,7 @@ from splunklib.searchcommands import dispatch, GeneratingCommand, Configuration,
 from splunklib import six
 from collections import OrderedDict
 import json
+import os
 
 
 class Date(validators.Validator):
@@ -49,10 +50,10 @@ class INSEECommand(GeneratingCommand):
     debug = Option(require=False, validate=validators.Boolean())
     proxy = Option(require=False, validate=validators.Boolean())
 
-    def configuration(self):
+    def set_configuration(self):
         # Open the configuration file
         try:
-            with open('./configuration_json.txt', 'r') as conf_file:
+            with open(os.path.dirname(os.path.abspath(__file__)) + '/configuration_json.txt', 'r') as conf_file:
                 conf = json.load(conf_file)
         except ValueError:
             self.logger.error('  invalid JSON configuration file')
@@ -259,6 +260,9 @@ class INSEECommand(GeneratingCommand):
         return sieges
 
     def generate(self):
+
+        self.set_configuration()
+        
         # CSV header
         csv_header = ['SIREN', 'NIC', 'L1_NORMALISEE', 'L2_NORMALISEE', 'L3_NORMALISEE', 'L4_NORMALISEE', 'L5_NORMALISEE',
          'L6_NORMALISEE', 'L7_NORMALISEE', 'L1_DECLAREE', 'L2_DECLAREE', 'L3_DECLAREE', 'L4_DECLAREE', 'L5_DECLAREE',
