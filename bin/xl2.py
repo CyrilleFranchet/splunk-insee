@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
 import sys
-from bin.splunklib import \
-    dispatch, ReportingCommand, Configuration, Option, six
-from bin.splunklib.searchcommands import validators
+from splunklib import six
+from splunklib.searchcommands import dispatch, ReportingCommand, Configuration, Option, validators
 import os
 from datetime import date, timedelta, datetime
 
