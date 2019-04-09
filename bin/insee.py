@@ -51,6 +51,9 @@ class INSEECommand(GeneratingCommand):
     proxy = Option(require=False, validate=validators.Boolean())
 
     def set_configuration(self):
+
+        self.logger.logging_level = 'DEBUG'
+        
         # Open the configuration file
         try:
             with open(os.path.dirname(os.path.abspath(__file__)) + '/configuration_json.txt', 'r') as conf_file:
@@ -262,7 +265,7 @@ class INSEECommand(GeneratingCommand):
     def generate(self):
 
         self.set_configuration()
-        
+
         # CSV header
         csv_header = ['SIREN', 'NIC', 'L1_NORMALISEE', 'L2_NORMALISEE', 'L3_NORMALISEE', 'L4_NORMALISEE', 'L5_NORMALISEE',
          'L6_NORMALISEE', 'L7_NORMALISEE', 'L1_DECLAREE', 'L2_DECLAREE', 'L3_DECLAREE', 'L4_DECLAREE', 'L5_DECLAREE',
