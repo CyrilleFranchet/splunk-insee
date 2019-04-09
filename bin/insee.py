@@ -509,15 +509,15 @@ class INSEECommand(GeneratingCommand):
                         cce = v(siege['adresseEtablissement']['codePaysEtrangerEtablissement'])
                     else:
                         cce = v(siege['adresseEtablissement']['codeCommuneEtablissement'])
-                departement = cce[:3]
+                department = cce[:3]
                 rpen = ''
                 for key, value in RPEN.items():
-                    if departement in value:
+                    if department in value:
                         rpen = key
                 if rpen == '':
-                    departement = cce[:2]
+                    department = cce[:2]
                     for key, value in RPEN.items():
-                        if departement in value:
+                        if department in value:
                             rpen = key
                 new_siret['RPEN'] = rpen
                 new_siret['DEPCOMEN'] = cce
