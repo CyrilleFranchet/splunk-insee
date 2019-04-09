@@ -91,7 +91,7 @@ class INSEECommand(GeneratingCommand):
         elif r.status_code == 401:
             self.logger.error('  incorrect credentials : %s', r.json()['error_description'])
         else:
-            self.logger.error('  error during token retrieval. Code received : %d' % r.status_code)
+            self.logger.error('  error during token retrieval. Code received : %d', r.status_code)
         exit(1)
 
     def get_status(self):
@@ -121,7 +121,7 @@ class INSEECommand(GeneratingCommand):
         elif r.status_code == 406:
             self.logger.error('  invalid Accept header in status request')
         else:
-            self.logger.error('  error during status retrieval. Code received : %d' % r.status_code)
+            self.logger.error('  error during status retrieval. Code received : %d', r.status_code)
         return None
 
     def get_siret(self, q=None, nombre=None, curseur=None, champs=None, gzip=False):
@@ -172,9 +172,9 @@ class INSEECommand(GeneratingCommand):
             self.logger.error('  siret request URI too long')
         # TODO : many errors appear in log file
         else:
-            self.logger.error('  error during siret retrieval. Code received : %d' % r.status_code)
+            self.logger.error('  error during siret retrieval. Code received : %d', r.status_code)
             if self.debug:
-                self.logger.debug('  response %s' % r.text)
+                self.logger.debug('  response %s', r.text)
         exit(1)
 
     def get_updated_siret_records(self, date):
@@ -204,7 +204,7 @@ class INSEECommand(GeneratingCommand):
                 if self.debug:
                     self.logger.debug('  header siret %s', header)
             except KeyError as e:
-                self.logger.error('  missing key in response from API: %s' % e)
+                self.logger.error('  missing key in response from API: %s', e)
                 exit(1)
 
         return updated_siret_list
@@ -224,7 +224,7 @@ class INSEECommand(GeneratingCommand):
             if self.debug:
                 self.logger.debug('  header siret %s', header)
         except KeyError as e:
-            self.logger.error('  missing key in response from API: %s' % e)
+            self.logger.error('  missing key in response from API: %s', e)
             exit(1)
 
         return siret
@@ -256,11 +256,11 @@ class INSEECommand(GeneratingCommand):
                 if self.debug:
                     self.logger.debug('  header siret %s', header)
             except KeyError as e:
-                self.logger.error('  missing key in response from API: %s' % e)
+                self.logger.error('  missing key in response from API: %s', e)
                 exit(1)
 
         if self.debug:
-            self.logger.debug('  retrieved %d of %d headquarters', (len(sieges), len(siret_to_retrieve)))
+            self.logger.debug('  retrieved %d of %d headquarters', len(sieges), len(siret_to_retrieve))
 
         return sieges
 
@@ -508,7 +508,7 @@ class INSEECommand(GeneratingCommand):
                         siege = siret_siege[v(siret['siren'])+v(u['nicSiegeUniteLegale'])]
                     except KeyError as e:
                         self.logger.error('  siret %s has an invalid headquarter %s', \
-                                          (siret, v(siret['siren']) + v(u['nicSiegeUniteLegale'])))
+                                          siret, v(siret['siren']) + v(u['nicSiegeUniteLegale']))
                         continue
                     if v(siege['adresseEtablissement']['codePaysEtrangerEtablissement']):
                         cce = v(siege['adresseEtablissement']['codePaysEtrangerEtablissement'])
@@ -586,7 +586,7 @@ class INSEECommand(GeneratingCommand):
                 new_siret['TEL'] = ''
             # TODO : too much errors are coming from there
             except KeyError as e:
-                self.logger.error('  missing key in siret received from API: %s' % e)
+                self.logger.error('  missing key in siret received from API: %s', e)
                 if self.debug:
                     self.logger.debug('  siret to update: %s', siret)
                     self.logger.debug('  new_siret object: %s', new_siret)
