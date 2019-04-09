@@ -32,7 +32,7 @@ class Date(validators.Validator):
         return six.text_type(value)
 
 
-@Configuration(type='events', retainsevents=True, streaming=False)
+@Configuration(type='events')
 class INSEECommand(GeneratingCommand):
     """ Synopsis
 
@@ -48,6 +48,35 @@ class INSEECommand(GeneratingCommand):
     dtr = Option(require=False, validate=Date())
     debug = Option(require=False, validate=validators.Boolean())
     proxy = Option(require=False, validate=validators.Boolean())
+
+    def configuration(self):
+        # Open the configuration file
+        try:
+            with open('./configuration_json.txt', 'r') as conf_file:
+                conf = json.load(conf_file)
+        except ValueError:
+            self.logger.error('  invalid JSON configuration file')
+            exit(1)
+        except IOError:
+            self.logger.error('  configuration file doesn\'t exist')
+            exit(1)
+
+        # Verify the configuration
+        if self.proxy:
+            if 'http_proxy' not in conf or 'https_proxy' not in conf:
+                self.logger.error('  proxies are not defined in the configuration file')
+                exit(1)
+            self.proxies = dict()
+            self.proxies['http'] = conf['http_proxy']
+            self.proxies['https'] = conf['https_proxy']
+
+        if 'consumer_key' not in conf or 'consumer_secret' not in conf:
+            self.logger.error('  API credentials are not defined in the configuration file')
+            exit(1)
+
+        self.consumer_key = conf['consumer_key']
+        self.consumer_secret = conf['consumer_secret']
+        self.bearer_token = self.get_api_token()
 
     def get_api_token(self):
         payload = {'grant_type': 'client_credentials'}
@@ -554,37 +583,6 @@ class INSEECommand(GeneratingCommand):
             raw = ''.join(k+'='+'\"{0}\"'.format(v)+' ' for k, v in new_siret.items())
             event += 1
             yield {'_time': time.time(), 'event_no': event, '_raw': raw}
-
-    def __init__(self):
-        super(INSEECommand, self).__init__()
-
-        # Open the configuration file
-        try:
-            with open('./configuration_json.txt', 'r') as conf_file:
-                conf = json.load(conf_file)
-        except ValueError:
-            self.logger.error('  invalid JSON configuration file')
-            exit(1)
-        except IOError:
-            self.logger.error('  configuration file doesn\'t exist')
-            exit(1)
-
-        # Verify the configuration
-        if self.proxy:
-            if 'http_proxy' not in conf or 'https_proxy' not in conf:
-                self.logger.error('  proxies are not defined in the configuration file')
-                exit(1)
-            self.proxies = dict()
-            self.proxies['http'] = conf['http_proxy']
-            self.proxies['https'] = conf['https_proxy']
-
-        if 'consumer_key' not in conf or 'consumer_secret' not in conf:
-            self.logger.error('  API credentials are not defined in the configuration file')
-            exit(1)
-
-        self.consumer_key = conf['consumer_key']
-        self.consumer_secret = conf['consumer_secret']
-        self.bearer_token = self.get_api_token()
 
 
 dispatch(INSEECommand, sys.argv, sys.stdin, sys.stdout, __name__)
