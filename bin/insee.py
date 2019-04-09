@@ -39,7 +39,7 @@ class INSEECommand(GeneratingCommand):
 
     ##Syntax
 
-    insee
+    | insee [dtr=date_to_retrieve] [proxy=true] [debug=true]
 
     ##Description
 
@@ -192,7 +192,6 @@ class INSEECommand(GeneratingCommand):
         curseur_suivant = '*'
         while curseur != curseur_suivant:
             curseur = curseur_suivant
-            #j = self.get_siret(q=q, curseur=curseur, nombre=10000, champs=champs, gzip=True)
             j = self.get_siret(q=q, curseur=curseur, nombre=10000, gzip=True)
             try:
                 header = j['header']
@@ -372,8 +371,6 @@ class INSEECommand(GeneratingCommand):
 
         # We retrieve all headquarters
         siret_siege = self.get_etablissements_siege(siret_to_retrieve)
-        if self.debug:
-            self.logger.debug('  retrieved %i headquarter siret', len(siret_siege))
 
         event = 1
         # Parse the list of siret
