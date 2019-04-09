@@ -501,14 +501,14 @@ class INSEECommand(GeneratingCommand):
                 else:
                     try:
                         siege = siret_siege[v(siret['siren'])+v(u['nicSiegeUniteLegale'])]
-                        if v(siege['adresseEtablissement']['codePaysEtrangerEtablissement']):
-                            cce = v(siege['adresseEtablissement']['codePaysEtrangerEtablissement'])
-                        else:
-                            cce = v(siege['adresseEtablissement']['codeCommuneEtablissement'])
                     except KeyError as e:
-                        self.logger.error('  siret %s has an invalid headquarter %s',\
-                                          (siret, v(siret['siren'])+v(u['nicSiegeUniteLegale'])))
+                        self.logger.error('  siret %s has an invalid headquarter %s', \
+                                          (siret, v(siret['siren']) + v(u['nicSiegeUniteLegale'])))
                         continue
+                    if v(siege['adresseEtablissement']['codePaysEtrangerEtablissement']):
+                        cce = v(siege['adresseEtablissement']['codePaysEtrangerEtablissement'])
+                    else:
+                        cce = v(siege['adresseEtablissement']['codeCommuneEtablissement'])
                 departement = cce[:3]
                 rpen = ''
                 for key, value in RPEN.items():
