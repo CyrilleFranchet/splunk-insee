@@ -357,7 +357,7 @@ class INSEECommand(GeneratingCommand):
         # Get updated siret records
         updated_siret_list = self.get_updated_siret_records(day_before_yesterday)
         if self.debug:
-            self.logger.debug('  retrieved %i siret', len(updated_siret_list))
+            self.logger.debug('  retrieved %i siret to update', len(updated_siret_list))
 
         # Ugly hack
         #raw = ''.join(value + '="' + value + '" ' for value in csv_header)
@@ -583,6 +583,7 @@ class INSEECommand(GeneratingCommand):
                 self.logger.error('  data received by siret endpoint is not expected : %s %s' % (e, e.message))
                 if self.debug:
                     self.logger.debug('  siret : %s', siret)
+                    self.logger.debug('  new_siret : %s', new_siret)
                 exit(1)
             
             #raw = ''.join(k+'='+'\'{0}\''.format(v)+' ' for k, v in new_siret.items())
