@@ -259,6 +259,9 @@ class INSEECommand(GeneratingCommand):
                 self.logger.error('  missing key in response from API: %s' % e)
                 exit(1)
 
+        if self.debug:
+            self.logger.debug('  retrieved %d of %d headquarters', (len(sieges), len(siret_to_retrieve)))
+
         return sieges
 
     def generate(self):
