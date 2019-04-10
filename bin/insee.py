@@ -598,6 +598,6 @@ class INSEECommand(GeneratingCommand):
             raw = ''.join(k+'='+'\"{0}\"'.format(v)+' ' for k, v in new_siret.items())
             event += 1
             yield {'_time': time.time(), 'event_no': event, '_raw': raw}
-        self.logger.info('  generated %d events', event)
+        self.logger.info('  generated %d events', event-1)
 
 dispatch(INSEECommand, sys.argv, sys.stdin, sys.stdout, __name__)
