@@ -75,17 +75,24 @@ class INSEECommand(GeneratingCommand):
             self.logger.error('  API credentials are not defined in the configuration file')
             exit(1)
 
+        if 'endpoint_token' not in conf or 'endpoint_etablissement' not in conf or 'endpoint_informations' not in conf:
+            self.logger.error('  API endpoints are not defined in the configuration file')
+            exit(1)
+
         self.consumer_key = conf['consumer_key']
         self.consumer_secret = conf['consumer_secret']
+        self.endpoint_token = conf['endpoint_token']
+        self.endpoint_etablissement = conf['endpoint_etablissement']
+        self.endpoint_informations = conf['endpoint_informations']
         self.bearer_token = self.get_api_token()
 
     def get_api_token(self):
         payload = {'grant_type': 'client_credentials'}
         basic_auth = HTTPBasicAuth(self.consumer_key, self.consumer_secret)
         if self.proxy:
-            r = requests.post('https://api.insee.fr/token', auth=basic_auth, data=payload, proxies=self.proxies)
+            r = requests.post(self.endpoint_token, auth=basic_auth, data=payload, proxies=self.proxies)
         else:
-            r = requests.post('https://api.insee.fr/token', auth=basic_auth, data=payload)
+            r = requests.post(self.endpoint_token, auth=basic_auth, data=payload)
         if r.status_code == 200:
             return r.json()['access_token']
         elif r.status_code == 401:
@@ -99,20 +106,20 @@ class INSEECommand(GeneratingCommand):
         headers = {'Authorization': 'Bearer ' + self.bearer_token}
 
         if self.proxy:
-            r = requests.get('https://api.insee.fr/entreprises/sirene/V3/informations', headers=headers,
+            r = requests.get(self.endpoint_informations, headers=headers,
                              proxies=self.proxies)
         else:
-            r = requests.get('https://api.insee.fr/entreprises/sirene/V3/informations', headers=headers)
+            r = requests.get(self.endpoint_informations, headers=headers)
 
         while r.status_code == 429:
             # We made too many requests. We wait for the next rounded minute
             current_second = datetime.now().time().strftime('%S')
             time.sleep(60 - int(current_second) + 1)
             if self.proxy:
-                r = requests.get('https://api.insee.fr/entreprises/sirene/V3/informations', headers=headers,
+                r = requests.get(self.endpoint_informations, headers=headers,
                                  proxies=self.proxies)
             else:
-                r = requests.get('https://api.insee.fr/entreprises/sirene/V3/informations', headers=headers)
+                r = requests.get(self.endpoint_informations, headers=headers)
 
         if r.status_code == 200:
             return r.json()
@@ -143,20 +150,20 @@ class INSEECommand(GeneratingCommand):
             headers['Accept-Encoding'] = 'gzip'
 
         if self.proxy:
-            r = requests.get('https://api.insee.fr/entreprises/sirene/V3/siret', headers=headers, params=payload,
+            r = requests.get(self.endpoint_etablissement, headers=headers, params=payload,
                              proxies=self.proxies)
         else:
-            r = requests.get('https://api.insee.fr/entreprises/sirene/V3/siret', headers=headers, params=payload)
+            r = requests.get(self.endpoint_etablissement, headers=headers, params=payload)
 
         while r.status_code == 429:
             # We made too many requests. We wait for the next rounded minute
             current_second = datetime.now().time().strftime('%S')
             time.sleep(60 - int(current_second) + 1)
             if self.proxy:
-                r = requests.get('https://api.insee.fr/entreprises/sirene/V3/siret', headers=headers, params=payload,
+                r = requests.get(self.endpoint_etablissement, headers=headers, params=payload,
                                  proxies=self.proxies)
             else:
-                r = requests.get('https://api.insee.fr/entreprises/sirene/V3/siret', headers=headers, params=payload)
+                r = requests.get(self.endpoint_etablissement, headers=headers, params=payload)
 
         if r.status_code == 200:
             return r.json()

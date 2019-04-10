@@ -2,5 +2,9 @@
     "consumer_key": "my_key",
     "consumer_secret": "my_secret",
     "http_proxy": "http://@127.0.0.1:3128",
-    "https_proxy": "http://@127.0.0.1:3128"
+    "https_proxy": "http://@127.0.0.1:3128",
+    "endpoint_informations": "https://api.insee.fr/entreprises/sirene/V3/informations",
+    "endpoint_etablissement": "https://api.insee.fr/entreprises/sirene/V3/siret",
+    "endpoint_token": "https://api.insee.fr/token"
+
 }

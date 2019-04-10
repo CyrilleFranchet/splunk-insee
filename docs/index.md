@@ -19,10 +19,14 @@ De plus, cette commande est configurée par un fichier de configuration JSON qui
     "consumer_key": "my_key",
     "consumer_secret": "my_secret",
     "http_proxy": "http://@127.0.0.1:3128",
-    "https_proxy": "http://@127.0.0.1:3128"
+    "https_proxy": "http://@127.0.0.1:3128",
+    "endpoint_informations": "https://api.insee.fr/entreprises/sirene/V3/informations",
+    "endpoint_etablissement": "https://api.insee.fr/entreprises/sirene/V3/siret",
+    "endpoint_token": "https://api.insee.fr/token"
 }
 ```
 Les paramètres consumer correspondent aux identifiants de l’API SIRENE de l’INSEE et les deux URL aux proxies HTTP et HTTPS s’ils sont nécessaires à l’accès Internet.
+Les URL de l'API permettent de modifier les URL des endpoints si l'INSEE les modifie.
 
 ## Commande xl2
 Commande de rapport prenant des évènements Splunk en entrée pour les inscrire dans un fichier CSV dans un format où les colonnes sont séparées par des « ; » et où les valeurs sont entre «"».
