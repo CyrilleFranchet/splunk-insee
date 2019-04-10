@@ -258,8 +258,7 @@ class INSEECommand(GeneratingCommand):
                 self.logger.error('  missing key in response from API: %s', e)
                 exit(1)
 
-        if self.debug:
-            self.logger.debug('  retrieved %d of %d headquarters', len(sieges), len(siret_to_retrieve))
+        self.logger.info('  retrieved %d of %d headquarters', len(sieges), len(siret_to_retrieve))
 
         return sieges
 
@@ -360,8 +359,7 @@ class INSEECommand(GeneratingCommand):
 
         # Get updated siret records
         updated_siret_list = self.get_updated_siret_records(day_before_yesterday)
-        if self.debug:
-            self.logger.debug('  retrieved %i siret to update', len(updated_siret_list))
+        self.logger.info('  retrieved %i siret to update', len(updated_siret_list))
 
         siret_to_retrieve = list()
         for siret in updated_siret_list:
@@ -515,7 +513,7 @@ class INSEECommand(GeneratingCommand):
                     try:
                         siege = siret_siege[v(siret['siren'])+v(u['nicSiegeUniteLegale'])]
                     except KeyError as e:
-                        self.logger.error('  siret %s has an invalid headquarter %s', \
+                        self.logger.info('  siret %s has an invalid headquarter %s', \
                                           v(siret['siret']), v(siret['siren']) + v(u['nicSiegeUniteLegale']))
                     else:
                         if v(siege['adresseEtablissement']['codePaysEtrangerEtablissement']):
@@ -593,6 +591,6 @@ class INSEECommand(GeneratingCommand):
             raw = ''.join(k+'='+'\"{0}\"'.format(v)+' ' for k, v in new_siret.items())
             event += 1
             yield {'_time': time.time(), 'event_no': event, '_raw': raw}
-
+        self.logger.info('  generated %d events', event)
 
 dispatch(INSEECommand, sys.argv, sys.stdin, sys.stdout, __name__)
