@@ -366,7 +366,7 @@ class INSEECommand(GeneratingCommand):
 
         # Get updated siret records
         updated_siret_list = self.get_updated_siret_records(day_before_yesterday)
-        self.logger.info('  retrieved %i siret to update', len(updated_siret_list))
+        self.logger.info('  retrieved %d siret to update', len(updated_siret_list))
 
         siret_to_retrieve = list()
         for siret in updated_siret_list:
