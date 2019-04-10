@@ -67,5 +67,11 @@ cd $SPLUNK_HOME/etc/apps/splunk-insee
 git pull
 ```
 
-Il peut-être nécessaire de redémarrer Splunk dès lors que les modifications ne concernant pas le code Python. Il est donc convenu que le code Python peut être modifié à chaud sans nécessiter le moindre redémarrage de Splunk.
+Il est préférable de redémarrer Splunk.
 
+# Gestion des messages d'erreur
+Par défaut la commande inscrit quatre informations dans le fichier de journalisation insee.log :
+- le nombre d'établissements modifiés à la date demandée ;
+- le nombre d'établissements siège réellement récupérés par rapport au nombre à récupérer ;
+- les éventuels établissements ont le siège pose un problème
+- le nombre d'évènements finalement générés dans Splunk. Ce nombre doit être égal au nombre d'établissements modifiés à la date demandée.
