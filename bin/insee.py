@@ -378,6 +378,8 @@ class INSEECommand(GeneratingCommand):
         siret_siege = self.get_etablissements_siege(siret_to_retrieve)
 
         event = 1
+        count_in = 0
+        count_out = 0
         # Parse the list of siret
         for siret in updated_siret_list:
             new_siret = OrderedDict()
@@ -560,8 +562,10 @@ class INSEECommand(GeneratingCommand):
                 new_siret['ESASEC4N'] = ''
                 if v(p['etatAdministratifEtablissement']) == 'A':
                     new_siret['VMAJ'] = 'C'
+                    count_in += 1
                 elif v(p['etatAdministratifEtablissement']) == 'F':
                     new_siret['VMAJ'] = 'O'
+                    count_out += 1
                 new_siret['VMAJ1'] = ''
                 new_siret['VMAJ2'] = ''
                 new_siret['VMAJ3'] = ''
@@ -599,5 +603,7 @@ class INSEECommand(GeneratingCommand):
             event += 1
             yield {'_time': time.time(), 'event_no': event, '_raw': raw}
         self.logger.info('  generated %d events', event-1)
+        self.logger.info('  found %d SIRET to create', count_in)
+        self.logger.info('  found %d SIRET to delete', count_out)
 
 dispatch(INSEECommand, sys.argv, sys.stdin, sys.stdout, __name__)
