@@ -496,6 +496,7 @@ class INSEECommand(GeneratingCommand):
                 new_siret['SIGLE'] = v(u['sigleUniteLegale'])
                 new_siret['NOM'] = v(u['nomUniteLegale'])
                 new_siret['PRENOM'] = v(u['prenom1UniteLegale'])
+                new_siret['CIVILITE'] = ''
                 if v(u['sexeUniteLegale']) == 'F':
                     new_siret['CIVILITE'] = 2
                 elif v(u['sexeUniteLegale']) == 'M':
@@ -529,6 +530,16 @@ class INSEECommand(GeneratingCommand):
                             cce = v(siege['adresseEtablissement']['codePaysEtrangerEtablissement'])
                         else:
                             cce = v(siege['adresseEtablissement']['codeCommuneEtablissement'])
+                        department = cce[:3]
+                        rpen = ''
+                        for key, value in RPEN.items():
+                            if department in value:
+                                rpen = key
+                        if rpen == '':
+                            department = cce[:2]
+                            for key, value in RPEN.items():
+                                if department in value:
+                                    rpen = key
                 new_siret['RPEN'] = rpen
                 new_siret['DEPCOMEN'] = cce
                 new_siret['ADR_MAIL'] = ''
