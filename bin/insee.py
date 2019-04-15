@@ -336,25 +336,24 @@ class INSEECommand(GeneratingCommand):
 
         }
 
-        # Get status for debugging purposes
-        if self.debug:
-            status_object = self.get_status()
-            if status_object:
-                if 'versionService' in status_object:
-                    self.logger.debug('  versionService %s', status_object['versionService'].encode('utf-8'))
-                if 'datesDernieresMisesAJourDesDonnees' in status_object:
-                    for collection in status_object['datesDernieresMisesAJourDesDonnees']:
-                        if 'collection' in collection and collection['collection']:
-                            self.logger.debug('  collection %s', collection['collection'].encode('utf-8'))
-                        if 'dateDerniereMiseADisposition' in collection and collection['dateDerniereMiseADisposition']:
-                            self.logger.debug('  dateDerniereMiseADisposition %s',
-                                              collection['dateDerniereMiseADisposition'].encode('utf-8'))
-                        if 'dateDernierTraitementDeMasse' in collection and collection['dateDernierTraitementDeMasse']:
-                            self.logger.debug('  dateDernierTraitementDeMasse %s',
-                                              collection['dateDernierTraitementDeMasse'].encode('utf-8'))
-                        if 'dateDernierTraitementMaximum' in collection and collection['dateDernierTraitementMaximum']:
-                            self.logger.debug('  dateDernierTraitementMaximum %s',
-                                              collection['dateDernierTraitementMaximum'].encode('utf-8'))
+        # Get status
+        status_object = self.get_status()
+        if status_object:
+            if 'versionService' in status_object:
+                self.logger.info('  versionService %s', status_object['versionService'].encode('utf-8'))
+            if 'datesDernieresMisesAJourDesDonnees' in status_object:
+                for collection in status_object['datesDernieresMisesAJourDesDonnees']:
+                    if 'collection' in collection and collection['collection']:
+                        self.logger.info('  collection %s', collection['collection'].encode('utf-8'))
+                    if 'dateDerniereMiseADisposition' in collection and collection['dateDerniereMiseADisposition']:
+                        self.logger.info('  dateDerniereMiseADisposition %s',
+                                          collection['dateDerniereMiseADisposition'].encode('utf-8'))
+                    if 'dateDernierTraitementDeMasse' in collection and collection['dateDernierTraitementDeMasse']:
+                        self.logger.info('  dateDernierTraitementDeMasse %s',
+                                          collection['dateDernierTraitementDeMasse'].encode('utf-8'))
+                    if 'dateDernierTraitementMaximum' in collection and collection['dateDernierTraitementMaximum']:
+                        self.logger.info('  dateDernierTraitementMaximum %s',
+                                          collection['dateDernierTraitementMaximum'].encode('utf-8'))
 
         # Date to retrieve has been set
         if self.dtr:
