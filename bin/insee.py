@@ -344,15 +344,15 @@ class INSEECommand(GeneratingCommand):
                     self.logger.debug('  versionService %s', status_object['versionService'].encode('utf-8'))
                 if 'datesDernieresMisesAJourDesDonnees' in status_object:
                     for collection in status_object['datesDernieresMisesAJourDesDonnees']:
-                        if 'collection' in collection:
+                        if 'collection' in collection and collection['collection']:
                             self.logger.debug('  collection %s', collection['collection'].encode('utf-8'))
-                        if 'dateDerniereMiseADisposition' in collection:
+                        if 'dateDerniereMiseADisposition' in collection and collection['dateDerniereMiseADisposition']:
                             self.logger.debug('  dateDerniereMiseADisposition %s',
                                               collection['dateDerniereMiseADisposition'].encode('utf-8'))
-                        if 'dateDernierTraitementDeMasse' in collection:
+                        if 'dateDernierTraitementDeMasse' in collection and collection['dateDernierTraitementDeMasse']:
                             self.logger.debug('  dateDernierTraitementDeMasse %s',
                                               collection['dateDernierTraitementDeMasse'].encode('utf-8'))
-                        if 'dateDernierTraitementMaximum' in collection:
+                        if 'dateDernierTraitementMaximum' in collection and collection['dateDernierTraitementMaximum']:
                             self.logger.debug('  dateDernierTraitementMaximum %s',
                                               collection['dateDernierTraitementMaximum'].encode('utf-8'))
 
