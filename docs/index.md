@@ -92,10 +92,6 @@ De plus, si la commande fonctionne correctement, elle inscrit les informations s
 2019-04-18 06:01:04,367, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=531,   siret 38375385200029 has an invalid headquarter 38375385200037
 2019-04-18 06:01:03,999, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=268,   retrieved 2948 of 2949 headquarters
 2019-04-18 06:00:13,999, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=373,   retrieved 17735 siret to update
-2019-04-18 06:00:01,918, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=362,   collection Liens de succession dateDerniereMiseADisposition 2019-04-17T10:57:07 dateDernierTraitementMaximum 2019-04-16T19:35:21 
-2019-04-18 06:00:01,918, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=362,   collection Établissements dateDerniereMiseADisposition 2019-04-17T23:56:14 dateDernierTraitementDeMasse 2018-09-30 dateDernierTraitementMaximum 2019-04-17T20:45:41 
-2019-04-18 06:00:01,918, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=362,   collection Unités Légales dateDerniereMiseADisposition 2019-04-17T23:33:15 dateDernierTraitementDeMasse 2018-09-30 dateDernierTraitementMaximum 2019-04-17T20:45:41 
-2019-04-18 06:00:01,918, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=343,   versionService 3.6.3
 ```
 
 Il apparaît à l'usage que l'INSEE ne met pas toujours les données à disposition en temps et en heure. Dans ce cas, le script ne fonctionne pas car les données sont inexistantes.
