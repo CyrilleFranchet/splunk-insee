@@ -73,13 +73,11 @@ Il est préférable de redémarrer Splunk.
 # Gestion des messages d'erreur
 Par défaut, la commande interroge le endpoint informations afin de récupérer des informations telles que :
 - Une information sur la version actuelle de l'API ;
-- des informations sur les dates de mises à jour des différentes données exposées par l'API Sirene ;
+- des informations sur les dates de mises à jour des différentes données exposées par l'API Sirene :
   - collection : nom de la collection
   - dateDerniereMiseADisposition : date et heure de la dernière mise à disposition des données de la collection ;
   - dateDernierTraitementMaximum : date correspondant à la date de validité des données consultées ;
   - dateDernierTraitementDeMasse : date du dernier traitement de masse sur la collection. À cette date plusieurs centaines de milliers de documents ont pu être mis à jour. Il est conseillé de traiter cette date d'une manière spécifique.
-
-Ceci permet d'avoir des informations sur la dernière date de publication concernant les établissements, la date de dernier traitement de masse, etc.
 
 De plus, si la commande fonctionne correctement, elle inscrit les informations suivantes dans le fichier de journalisation insee.log :
 - Le nombre d'établissements modifiés à la date demandée ;
