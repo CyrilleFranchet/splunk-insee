@@ -62,6 +62,7 @@ Le script traite ensuite les données pour produire les évènements Splunk qui 
 
 # Resynchronisation de l'application sur la version GitHub
 Il suffit pour cela de se positionner dans le répertoire de l'application Splunk et de synchroniser le repository.
+
 ```
 cd $SPLUNK_HOME/etc/apps/splunk-insee
 git pull
@@ -70,14 +71,56 @@ git pull
 Il est préférable de redémarrer Splunk.
 
 # Gestion des messages d'erreur
-Par défaut la commande inscrit quatre informations dans le fichier de journalisation insee.log :
-- le nombre d'établissements modifiés à la date demandée ;
+Par défaut, la commande interroge le endpoint informations afin de récupérer des informations telles que :
+- Une information sur la version actuelle de l'API ;
+- des informations sur les dates de mises à jour des différentes données exposées par l'API Sirene ;
+  - collection : nom de la collection
+  - dateDerniereMiseADisposition : date et heure de la dernière mise à disposition des données de la collection ;
+  - dateDernierTraitementMaximum : date correspondant à la date de validité des données consultées ;
+  - dateDernierTraitementDeMasse : date du dernier traitement de masse sur la collection. À cette date plusieurs centaines de milliers de documents ont pu être mis à jour. Il est conseillé de traiter cette date d'une manière spécifique.
+
+Ceci permet d'avoir des informations sur la dernière date de publication concernant les établissements, la date de dernier traitement de masse, etc.
+
+De plus, si la commande fonctionne correctement, elle inscrit les informations suivantes dans le fichier de journalisation insee.log :
+- Le nombre d'établissements modifiés à la date demandée ;
 - le nombre d'établissements siège réellement récupérés par rapport au nombre à récupérer ;
-- les éventuels établissements ont le siège pose un problème
+- les éventuels établissements dont le siège pose un problème ;
 - le nombre d'évènements finalement générés dans Splunk. Ce nombre doit être égal au nombre d'établissements modifiés à la date demandée.
 
+```
+2019-04-18 06:01:08,770, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=622,   found 4919 SIRET to delete
+2019-04-18 06:01:08,770, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=621,   found 12816 SIRET to create
+2019-04-18 06:01:08,770, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=620,   generated 17735 events
+2019-04-18 06:01:04,367, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=531,   siret 38375385200029 has an invalid headquarter 38375385200037
+2019-04-18 06:01:03,999, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=268,   retrieved 2948 of 2949 headquarters
+2019-04-18 06:00:13,999, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=373,   retrieved 17735 siret to update
+2019-04-18 06:00:01,918, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=362,   collection Liens de succession dateDerniereMiseADisposition 2019-04-17T10:57:07 dateDernierTraitementMaximum 2019-04-16T19:35:21 
+2019-04-18 06:00:01,918, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=362,   collection Établissements dateDerniereMiseADisposition 2019-04-17T23:56:14 dateDernierTraitementDeMasse 2018-09-30 dateDernierTraitementMaximum 2019-04-17T20:45:41 
+2019-04-18 06:00:01,918, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=362,   collection Unités Légales dateDerniereMiseADisposition 2019-04-17T23:33:15 dateDernierTraitementDeMasse 2018-09-30 dateDernierTraitementMaximum 2019-04-17T20:45:41 
+2019-04-18 06:00:01,918, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=343,   versionService 3.6.3
+```
+
+Il apparaît à l'usage que l'INSEE ne met pas toujours les données à disposition en temps et en heure. Dans ce cas, le script ne fonctionne pas car les données sont inexistantes.
+L'exemple ci-dessous montre ce type d'erreur dans les journaux.
+
+```
+2019-04-25 06:00:03,255, Level=ERROR, Pid=18233, Logger=INSEECommand, File=insee.py, Line=175,   unknown siret: Aucun élément trouvé pour q=dateDernierTraitementEtablissement:2019-04-24
+2019-04-25 06:00:02,874, Level=INFO, Pid=18233, Logger=INSEECommand, File=insee.py, Line=362,   collection Liens de succession dateDerniereMiseADisposition 2019-04-23T23:37:03 dateDernierTraitementMaximum 2019-04-23T21:06:08 
+2019-04-25 06:00:02,874, Level=INFO, Pid=18233, Logger=INSEECommand, File=insee.py, Line=362,   collection Établissements dateDerniereMiseADisposition 2019-04-23T23:36:42 dateDernierTraitementDeMasse 2018-09-30 dateDernierTraitementMaximum 2019-04-23T21:28:48 
+2019-04-25 06:00:02,873, Level=INFO, Pid=18233, Logger=INSEECommand, File=insee.py, Line=362,   collection Unités Légales dateDerniereMiseADisposition 2019-04-23T23:12:57 dateDernierTraitementDeMasse 2018-09-30 dateDernierTraitementMaximum 2019-04-23T21:28:48 
+2019-04-25 06:00:02,872, Level=INFO, Pid=18233, Logger=INSEECommand, File=insee.py, Line=343,   versionService 3.6.3
+```
+
+Ici, l'information importante est :
+```
+Aucun élément trouvé pour q=dateDernierTraitementEtablissement:2019-04-24
+```
+
+Ceci se confirme par le fait que la date dateDerniereMiseADisposition est positionnée au 2019-04-23T23:36:42.
+Dans tel cas, il est nécessaire de relancer la commande manuellement en suivant le paragraphe suivant. Il peut aussi être judicieux de modifier l'heure d'exécution de la recherche sur Splunk.
+
 # Récupération d'une journée en cas d'erreur
-Toutes les journées doivent être récupérées manuellement en spécifiant la date manquante.
+Toutes les journées doivent être récupérées manuellement en spécifiant la date manquante car les données sont cumulatives.
 
 Exemple, ici nous récupérons manuellement la date du 13 avril 2019 :
 
