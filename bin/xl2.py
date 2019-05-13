@@ -7,10 +7,12 @@ import os
 from datetime import date, timedelta, datetime
 import json
 
+
 class Date(validators.Validator):
     """ Validates Date option values.
 
     """
+
     def __call__(self, value):
         if value is None:
             return None
@@ -68,27 +70,27 @@ class XL2Command(ReportingCommand):
 
         self.set_configuration()
 
-        #splunk_home = os.environ['SPLUNK_HOME']
+        # splunk_home = os.environ['SPLUNK_HOME']
 
         if self.dtr:
             filename = self.dtr + '_' + datetime.now().strftime('%Y%m%d%H%M%S')
         else:
-            filename = (date.today() - timedelta(1)).strftime('%Y-%m-%d') + '_' +\
+            filename = (date.today() - timedelta(1)).strftime('%Y-%m-%d') + '_' + \
                        datetime.now().strftime('%Y%m%d%H%M%S')
 
         header = ('"SIREN";"NIC";"L1_NORMALISEE";"L2_NORMALISEE";"L3_NORMALISEE";"L4_NORMALISEE";"L5_NORMALISEE";'
-                '"L6_NORMALISEE";"L7_NORMALISEE";"L1_DECLAREE";"L2_DECLAREE";"L3_DECLAREE";"L4_DECLAREE";'
-                '"L5_DECLAREE";"L6_DECLAREE";"L7_DECLAREE";"NUMVOIE";"INDREP";"TYPVOIE";"LIBVOIE";"CODPOS";"CEDEX"'
-                ';"RPET";"LIBREG";"DEPET";"ARRONET";"CTONET";"COMET";"LIBCOM";"DU";"TU";"UU";"EPCI";"TCD";"ZEMET";'
-                '"SIEGE";"ENSEIGNE";"IND_PUBLIPO";"DIFFCOM";"AMINTRET";"NATETAB";"LIBNATETAB";"APET700";"LIBAPET";'
-                '"DAPET";"TEFET";"LIBTEFET";"EFETCENT";"DEFET";"ORIGINE";"DCRET";"DDEBACT";"ACTIVNAT";"LIEUACT";'
-                '"ACTISURF";"SAISONAT";"MODET";"PRODET";"PRODPART";"AUXILT";"NOMEN_LONG";"SIGLE";"NOM";"PRENOM";'
-                '"CIVILITE";"RNA";"NICSIEGE";"RPEN";"DEPCOMEN";"ADR_MAIL";"NJ";"LIBNJ";"APEN700";"LIBAPEN";"DAPEN"'
-                ';"APRM";"ESS";"DATEESS";"TEFEN";"LIBTEFEN";"EFENCENT";"DEFEN";"CATEGORIE";"DCREN";"AMINTREN";'
-                '"MONOACT";"MODEN";"PRODEN";"ESAANN";"TCA";"ESAAPEN";"ESASEC1N";"ESASEC2N";"ESASEC3N";"ESASEC4N";'
-                '"VMAJ";"VMAJ1";"VMAJ2";"VMAJ3";"DATEMAJ";"EVE";"DATEVE";"TYPCREH";"DREACTET";"DREACTEN";'
-                '"MADRESSE";"MENSEIGNE";"MAPET";"MPRODET";"MAUXILT";"MNOMEN";"MSIGLE";"MNICSIEGE";"MNJ";"MAPEN";'
-                '"MPRODEN";"SIRETPS";"TEL"\n')
+                  '"L6_NORMALISEE";"L7_NORMALISEE";"L1_DECLAREE";"L2_DECLAREE";"L3_DECLAREE";"L4_DECLAREE";'
+                  '"L5_DECLAREE";"L6_DECLAREE";"L7_DECLAREE";"NUMVOIE";"INDREP";"TYPVOIE";"LIBVOIE";"CODPOS";"CEDEX"'
+                  ';"RPET";"LIBREG";"DEPET";"ARRONET";"CTONET";"COMET";"LIBCOM";"DU";"TU";"UU";"EPCI";"TCD";"ZEMET";'
+                  '"SIEGE";"ENSEIGNE";"IND_PUBLIPO";"DIFFCOM";"AMINTRET";"NATETAB";"LIBNATETAB";"APET700";"LIBAPET";'
+                  '"DAPET";"TEFET";"LIBTEFET";"EFETCENT";"DEFET";"ORIGINE";"DCRET";"DDEBACT";"ACTIVNAT";"LIEUACT";'
+                  '"ACTISURF";"SAISONAT";"MODET";"PRODET";"PRODPART";"AUXILT";"NOMEN_LONG";"SIGLE";"NOM";"PRENOM";'
+                  '"CIVILITE";"RNA";"NICSIEGE";"RPEN";"DEPCOMEN";"ADR_MAIL";"NJ";"LIBNJ";"APEN700";"LIBAPEN";"DAPEN"'
+                  ';"APRM";"ESS";"DATEESS";"TEFEN";"LIBTEFEN";"EFENCENT";"DEFEN";"CATEGORIE";"DCREN";"AMINTREN";'
+                  '"MONOACT";"MODEN";"PRODEN";"ESAANN";"TCA";"ESAAPEN";"ESASEC1N";"ESASEC2N";"ESASEC3N";"ESASEC4N";'
+                  '"VMAJ";"VMAJ1";"VMAJ2";"VMAJ3";"DATEMAJ";"EVE";"DATEVE";"TYPCREH";"DREACTET";"DREACTEN";'
+                  '"MADRESSE";"MENSEIGNE";"MAPET";"MPRODET";"MAUXILT";"MNOMEN";"MSIGLE";"MNICSIEGE";"MNJ";"MAPEN";'
+                  '"MPRODEN";"SIRETPS";"TEL"\n')
 
         header_written = False
 
@@ -103,7 +105,7 @@ class XL2Command(ReportingCommand):
                 for f, v in event.items():
                     if not first:
                         fd.write(';')
-                    fd.write('"'+v+'"')
+                    fd.write('"' + v + '"')
                     row[f] = v
                     first = False
                 fd.write('\n')
