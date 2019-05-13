@@ -250,7 +250,7 @@ class INSEECommand(GeneratingCommand):
         return sieges
 
     def generate(self):
-
+        self.logger.error('toto')
         self.set_configuration()
         
         # CSV header
