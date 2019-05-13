@@ -177,7 +177,6 @@ class INSEECommand(GeneratingCommand):
             self.logger.error('  invalid Accept header in siret request')
         elif r.status_code == 414:
             self.logger.error('  siret request URI too long')
-        # TODO : many errors appear in log file
         else:
             self.logger.error('  error during siret retrieval. Code received : %d', r.status_code)
             if self.debug:
@@ -215,26 +214,6 @@ class INSEECommand(GeneratingCommand):
 
         return updated_siret_list
 
-    def get_etablissement_siege(self, siren, nic):
-        # Which fields do we need
-        champs = 'siren,nic,siret,etablissementSiege,codeCommuneEtablissement'
-
-        # Build the filter
-        q = 'siret:' + siren + nic
-
-        j = self.get_siret(q=q, champs=champs)
-        try:
-            header = j['header']
-            siret = j['etablissements'][0]
-            # Get header for debugging purposes
-            if self.debug:
-                self.logger.debug('  header siret %s', header)
-        except KeyError as e:
-            self.logger.error('  missing key in response from API: %s', e)
-            exit(1)
-
-        return siret
-
     @staticmethod
     def chunks(l, n):
         """Yield successive n-sized chunks from l."""
@@ -246,6 +225,7 @@ class INSEECommand(GeneratingCommand):
         champs = 'siren,nic,siret,etablissementSiege,codeCommuneEtablissement,codePaysEtrangerEtablissement'
 
         # Retrieve 85 records at each request
+        # If we have more than 85 siret, the query is too long and blocked by INSEE
         step = 85
         sieges = dict()
         for chunk in list(self.chunks(siret_to_retrieve, step)):
@@ -363,13 +343,13 @@ class INSEECommand(GeneratingCommand):
 
         # Date to retrieve has been set
         if self.dtr:
-            day_before_yesterday = self.dtr
+            day_to_retrieve = self.dtr
         # Day before yesterday
         else:
-            day_before_yesterday = (date.today() - timedelta(1)).strftime('%Y-%m-%d')
+            day_to_retrieve = (date.today() - timedelta(1)).strftime('%Y-%m-%d')
 
         # Get updated siret records
-        updated_siret_list = self.get_updated_siret_records(day_before_yesterday)
+        updated_siret_list = self.get_updated_siret_records(day_to_retrieve)
         self.logger.info('  retrieved %d siret to update', len(updated_siret_list))
 
         siret_to_retrieve = list()
@@ -606,7 +586,6 @@ class INSEECommand(GeneratingCommand):
                 new_siret['MPRODEN'] = ''
                 new_siret['SIRETPS'] = ''
                 new_siret['TEL'] = ''
-            # TODO : too much errors are coming from there
             except KeyError as e:
                 self.logger.error('  missing key in siret received from API: %s', e)
                 if self.debug:
