@@ -49,9 +49,7 @@ class XL2Command(ReportingCommand):
 
     def reduce(self, events):
 
-        self.set_configuration()
-
-        splunk_home = os.environ['SPLUNK_HOME']
+        #splunk_home = os.environ['SPLUNK_HOME']
 
         if self.dtr:
             filename = self.dtr + '_' + datetime.now().strftime('%Y%m%d%H%M%S')
