@@ -93,10 +93,13 @@ class INSEECommand(GeneratingCommand):
             r = requests.post(self.endpoint_token, auth=basic_auth, data=payload, proxies=self.proxies)
         else:
             r = requests.post(self.endpoint_token, auth=basic_auth, data=payload)
-        if r.status_code == 200:
-            return r.json()['access_token']
-        elif r.status_code == 401:
-            self.logger.error('  incorrect credentials : %s', r.json()['error_description'])
+        if 'Content-Type' in r.headers and r.headers['Content-Type'] == 'application/json':
+            if r.status_code == 200:
+                return r.json()['access_token']
+            elif r.status_code == 401:
+                self.logger.error('  incorrect credentials : %s', r.json()['error_description'])
+            else:
+                self.logger.error('  error during token retrieval. Code received : %d', r.status_code)
         else:
             self.logger.error('  error during token retrieval. Code received : %d', r.status_code)
         exit(1)
@@ -121,12 +124,15 @@ class INSEECommand(GeneratingCommand):
             else:
                 r = requests.get(self.endpoint_informations, headers=headers)
 
-        if r.status_code == 200:
-            return r.json()
-        elif r.status_code == 401:
-            self.logger.error('  invalid bearer token %s in status request', self.bearer_token)
-        elif r.status_code == 406:
-            self.logger.error('  invalid Accept header in status request')
+        if 'Content-Type' in r.headers and r.headers['Content-Type'] == 'application/json':
+            if r.status_code == 200:
+                return r.json()
+            elif r.status_code == 401:
+                self.logger.error('  invalid bearer token %s in status request', self.bearer_token)
+            elif r.status_code == 406:
+                self.logger.error('  invalid Accept header in status request')
+            else:
+                self.logger.error('  error during status retrieval. Code received : %d', r.status_code)
         else:
             self.logger.error('  error during status retrieval. Code received : %d', r.status_code)
         return None
@@ -165,22 +171,25 @@ class INSEECommand(GeneratingCommand):
             else:
                 r = requests.get(self.endpoint_etablissement, headers=headers, params=payload)
 
-        if r.status_code == 200:
-            return r.json()
-        elif r.status_code == 400:
-            self.logger.error('  invalid parameters in query: %s', r.json()['header']['message'])
-        elif r.status_code == 401:
-            self.logger.error('  invalid bearer token %s in siret request', self.bearer_token)
-        elif r.status_code == 404:
-            self.logger.error('  unknown siret: %s', r.json()['header']['message'])
-        elif r.status_code == 406:
-            self.logger.error('  invalid Accept header in siret request')
-        elif r.status_code == 414:
-            self.logger.error('  siret request URI too long')
+        if 'Content-Type' in r.headers and r.headers['Content-Type'] == 'application/json':
+            if r.status_code == 200:
+                return r.json()
+            elif r.status_code == 400:
+                self.logger.error('  invalid parameters in query: %s', r.json()['header']['message'])
+            elif r.status_code == 401:
+                self.logger.error('  invalid bearer token %s in siret request', self.bearer_token)
+            elif r.status_code == 404:
+                self.logger.error('  unknown siret: %s', r.json()['header']['message'])
+            elif r.status_code == 406:
+                self.logger.error('  invalid Accept header in siret request')
+            elif r.status_code == 414:
+                self.logger.error('  siret request URI too long')
+            else:
+                self.logger.error('  error during siret retrieval. Code received : %d', r.status_code)
         else:
             self.logger.error('  error during siret retrieval. Code received : %d', r.status_code)
-            if self.debug:
-                self.logger.debug('  response %s', r.text)
+        if self.debug:
+            self.logger.debug('  response %s', r.text)
         exit(1)
 
     def get_updated_siret_records(self, date):
