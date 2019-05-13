@@ -5,7 +5,6 @@ from splunklib import six
 from splunklib.searchcommands import dispatch, ReportingCommand, Configuration, Option, validators
 import os
 from datetime import date, timedelta, datetime
-import json
 
 
 class Date(validators.Validator):
@@ -44,24 +43,6 @@ class XL2Command(ReportingCommand):
     """
     dtr = Option(require=False, validate=Date())
 
-    def set_configuration(self):
-        # Open the configuration file
-        try:
-            with open(os.path.dirname(os.path.abspath(__file__)) + '/configuration_json.txt', 'r') as conf_file:
-                conf = json.load(conf_file)
-        except ValueError:
-            self.logger.error('  invalid JSON configuration file')
-            exit(1)
-        except IOError:
-            self.logger.error('  configuration file doesn\'t exist')
-            exit(1)
-
-        # Verify the configuration
-        if 'csv_folder' not in conf:
-            self.logger.error('  CSV folder is not defined in the configuration file')
-
-        self.csv_folder = conf['csv_folder']
-
     @Configuration()
     def map(self, records):
         return records
@@ -70,7 +51,7 @@ class XL2Command(ReportingCommand):
 
         self.set_configuration()
 
-        # splunk_home = os.environ['SPLUNK_HOME']
+        splunk_home = os.environ['SPLUNK_HOME']
 
         if self.dtr:
             filename = self.dtr + '_' + datetime.now().strftime('%Y%m%d%H%M%S')
@@ -95,7 +76,7 @@ class XL2Command(ReportingCommand):
         header_written = False
 
         for event in events:
-            with open(os.path.join(self.csv_folder, 'sirc-%s.csv' % filename), 'a') as fd:
+            with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/sirc-%s.csv' % filename), 'a') as fd:
                 if not header_written:
                     fd.write(header)
                     header_written = True
