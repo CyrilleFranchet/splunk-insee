@@ -408,6 +408,7 @@ class INSEECommand(GeneratingCommand):
                 try:
                     u = siret['uniteLegale']
                     a = siret['adresseEtablissement']
+                    # This field is unused
                     a2 = siret['adresse2Etablissement']
                     p = siret['periodesEtablissement'][0]
 
@@ -633,6 +634,7 @@ class INSEECommand(GeneratingCommand):
                 raw = ''.join(k+'='+'\"{0}\"'.format(v)+' ' for k, v in new_siret.items())
                 event += 1
                 yield {'_time': time.time(), 'event_no': event, '_raw': raw}
+
             self.logger.info('  generated %d events', event-1)
             self.logger.info('  found %d SIRET to create', count_in)
             self.logger.info('  found %d SIRET to delete', count_out)
@@ -640,6 +642,9 @@ class INSEECommand(GeneratingCommand):
         except (ExceptionTranslation, ExceptionHeadquarters, ExceptionUpdatedSiret, ExceptionSiret, ExceptionStatus,
                 ExceptionToken, ExceptionConfiguration):
             raise
+
+        # This is a bad practise, but we want a specific message in log file
+        # This case means that the code is missing an Exception handling
         except:
             self.logger.error('  unhandled exception has occurred. Read splunklib.log for more details')
             raise
