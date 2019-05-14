@@ -123,7 +123,7 @@ class INSEECommand(GeneratingCommand):
             r = requests.post(self.endpoint_token, auth=basic_auth, data=payload)
 
         if self.debug:
-            self.logger.debug('  token response %s\n%s', (r.headers, r.text))
+            self.logger.debug('  token response %s\n%s', r.headers, r.text)
 
         if 'Content-Type' in r.headers and r.headers['Content-Type'] == 'application/json':
             if r.status_code == 200:
@@ -147,7 +147,7 @@ class INSEECommand(GeneratingCommand):
             r = requests.get(self.endpoint_informations, headers=headers)
 
         if self.debug:
-            self.logger.debug('  status response %s\n%s', (r.headers, r.text))
+            self.logger.debug('  status response %s\n%s', r.headers, r.text)
 
         while r.status_code == 429:
             # We made too many requests. We wait for the next rounded minute
@@ -159,7 +159,7 @@ class INSEECommand(GeneratingCommand):
             else:
                 r = requests.get(self.endpoint_informations, headers=headers)
             if self.debug:
-                self.logger.debug('  status response %s\n%s', (r.headers, r.text))
+                self.logger.debug('  status response %s\n%s', r.headers, r.text)
 
         if 'Content-Type' in r.headers and r.headers['Content-Type'] == 'application/json':
             if r.status_code == 200:
@@ -199,7 +199,7 @@ class INSEECommand(GeneratingCommand):
             r = requests.get(self.endpoint_etablissement, headers=headers, params=payload)
 
         if self.debug:
-            self.logger.debug('  siret response %s\n%s', (r.headers, r.text))
+            self.logger.debug('  siret response %s\n%s', r.headers, r.text)
 
         while r.status_code == 429:
             # We made too many requests. We wait for the next rounded minute
@@ -211,7 +211,7 @@ class INSEECommand(GeneratingCommand):
             else:
                 r = requests.get(self.endpoint_etablissement, headers=headers, params=payload)
             if self.debug:
-                self.logger.debug('  siret response %s\n%s', (r.headers, r.text))
+                self.logger.debug('  siret response %s\n%s', r.headers, r.text)
 
         if 'Content-Type' in r.headers and r.headers['Content-Type'] == 'application/json':
             if r.status_code == 200:
