@@ -637,6 +637,9 @@ class INSEECommand(GeneratingCommand):
             self.logger.info('  found %d SIRET to create', count_in)
             self.logger.info('  found %d SIRET to delete', count_out)
 
+        except (ExceptionTranslation, ExceptionHeadquarters, ExceptionUpdatedSiret, ExceptionSiret, ExceptionStatus,
+                ExceptionToken, ExceptionConfiguration):
+            raise
         except:
             self.logger.error('  unhandled exception has occurred. Read splunklib.log for more details')
             raise
