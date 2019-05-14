@@ -125,7 +125,7 @@ class INSEECommand(GeneratingCommand):
         if self.debug:
             self.logger.debug('  token response %s\n%s', r.headers, r.text)
 
-        if 'Content-Type' in r.headers and r.headers['Content-Type'] == 'application/json':
+        if r.headers['Content-Type'] and r.headers['Content-Type'] == 'application/json':
             if r.status_code == 200:
                 return r.json()['access_token']
             elif r.status_code == 401:
@@ -161,7 +161,7 @@ class INSEECommand(GeneratingCommand):
             if self.debug:
                 self.logger.debug('  status response %s\n%s', r.headers, r.text)
 
-        if 'Content-Type' in r.headers and r.headers['Content-Type'] == 'application/json':
+        if r.headers['Content-Type'] and r.headers['Content-Type'] == 'application/json':
             if r.status_code == 200:
                 return r.json()
             elif r.status_code == 401:
@@ -213,7 +213,7 @@ class INSEECommand(GeneratingCommand):
             if self.debug:
                 self.logger.debug('  siret response %s\n%s', r.headers, r.text)
 
-        if 'Content-Type' in r.headers and r.headers['Content-Type'] == 'application/json':
+        if r.headers['Content-Type'] and r.headers['Content-Type'] == 'application/json':
             if r.status_code == 200:
                 return r.json()
             elif r.status_code == 400:
