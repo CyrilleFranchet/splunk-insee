@@ -66,33 +66,43 @@ La recherche suivante permet de récupérer les données de la veille et de les 
 ## Détails de la commande
 
 ```| insee proxy=true```
+
 La commande insee récupère les données de la veille en interrogeant l'API SIRENE.
 
 ```| extract limit=200 maxchars=100000```
+
 Il est indiqué à Splunk d'extraire les key=value automatiquement en lui indiquant que nous avons au moins 200 champs sur une ligne avec un au maximum 100000 caractères sur cette ligne.
 
 ```| lookup csv_naf ID as LIBAPET output LIBELLE as LIBAPET```
+
 Splunk ouvre le fichier csv_naf.csv et cherche la valeur LIBAPET dans la colonne ID afin de remplacer LIBAPET par la valeur de la colonne LIBELLE.
 
 ```| lookup csv_naf ID as LIBAPEN output LIBELLE as LIBAPEN```
+
 Splunk ouvre le fichier csv_naf.csv et cherche la valeur LIBAPEN dans la colonne ID afin de remplacer LIBAPEN par la valeur de la colonne LIBELLE.
 
 ```| lookup csv_nj ID as LIBNJ output LIBELLE as LIBNJ```
+
 Splunk ouvre le fichier csv_nj.csv et cherche la valeur LIBNJ dans la colonne ID afin de remplacer LIBNJ par la valeur de la colonne LIBELLE.
 
 ```| lookup csv_pays CODE AS L7_NORMALISEE output PAYS as L7_NORMALISEE_2```
+
 Splunk ouvre le fichier csv_pays.csv et cherche la valeur L7_NORMALISEE dans la colonne CODE afin de positionner L7_NORMALISEE_2 à la valeur de la colonne PAYS.
 
 ```| eval L7_NORMALISEE=coalesce(L7_NORMALISEE_2,L7_NORMALISEE)```
+
 Splunk positionne la valeur de L7_NORMALISEE à la valeur de L7_NORMALISEE_2 si ce champ n'est pas nul. Si ce n'est pas le cas, Splunk utilise la valeur de L7_NORMALISEE.
 
 ```| fields - _time _raw event_no _kv```
+
 Il est indiqué à Splunk de ne pas conserver les champs _time, _raw event_no et _kv afin de ne pas les inclure dans le CSV final.
 
 ```| fields SIREN,NIC,L1_NORMALISEE,L2_NORMALISEE,L3_NORMALISEE,L4_NORMALISEE,L5_NORMALISEE,L6_NORMALISEE,L7_NORMALISEE,L1_DECLAREE,L2_DECLAREE,L3_DECLAREE,L4_DECLAREE,L5_DECLAREE,L6_DECLAREE,L7_DECLAREE,NUMVOIE,INDREP,TYPVOIE,LIBVOIE,CODPOS,CEDEX,RPET,LIBREG,DEPET,ARRONET,CTONET,COMET,LIBCOM,DU,TU,UU,EPCI,TCD,ZEMET,SIEGE,ENSEIGNE,IND_PUBLIPO,DIFFCOM,AMINTRET,NATETAB,LIBNATETAB,APET700,LIBAPET,DAPET,TEFET,LIBTEFET,EFETCENT,DEFET,ORIGINE,DCRET,DDEBACT,ACTIVNAT,LIEUACT,ACTISURF,SAISONAT,MODET,PRODET,PRODPART,AUXILT,NOMEN_LONG,SIGLE,NOM,PRENOM,CIVILITE,RNA,NICSIEGE,RPEN,DEPCOMEN,ADR_MAIL,NJ,LIBNJ,APEN700,LIBAPEN,DAPEN,APRM,ESS,DATEESS,TEFEN,LIBTEFEN,EFENCENT,DEFEN,CATEGORIE,DCREN,AMINTREN,MONOACT,MODEN,PRODEN,ESAANN,TCA,ESAAPEN,ESASEC1N,ESASEC2N,ESASEC3N,ESASEC4N,VMAJ,VMAJ1,VMAJ2,VMAJ3,DATEMAJ,EVE,DATEVE,TYPCREH,DREACTET,DREACTEN,MADRESSE,MENSEIGNE,MAPET,MPRODET,MAUXILT,MNOMEN,MSIGLE,MNICSIEGE,MNJ,MAPEN,MPRODEN,SIRETPS,TEL```
+
 Les champs sont réordonnés afin de correspondre à l'ordre des colonnes du fichier CSV final.
 
 ```| xl2```
+
 La commande xl2 est appelée afin d'écrire les résultats dans le fichier CSV final en séparant les champs par un ";" et en entourant les valeurs avec le caractère ".
 
 
