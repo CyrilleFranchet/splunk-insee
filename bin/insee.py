@@ -645,8 +645,8 @@ class INSEECommand(GeneratingCommand):
 
         # This is a bad practise, but we want a specific message in log file
         # This case means that the code is missing an Exception handling
-        except:
-            self.logger.error('  unhandled exception has occurred. Read splunklib.log for more details')
+        except Exception as e:
+            self.logger.error('  unhandled exception has occurred: %s', e.message)
             raise
 
 
