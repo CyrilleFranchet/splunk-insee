@@ -121,6 +121,10 @@ class INSEECommand(GeneratingCommand):
             r = requests.post(self.endpoint_token, auth=basic_auth, data=payload, proxies=self.proxies)
         else:
             r = requests.post(self.endpoint_token, auth=basic_auth, data=payload)
+
+        if self.debug:
+            self.logger.debug('  token response %s\n%s', (r.headers, r.text))
+
         if 'Content-Type' in r.headers and r.headers['Content-Type'] == 'application/json':
             if r.status_code == 200:
                 return r.json()['access_token']
@@ -142,6 +146,9 @@ class INSEECommand(GeneratingCommand):
         else:
             r = requests.get(self.endpoint_informations, headers=headers)
 
+        if self.debug:
+            self.logger.debug('  status response %s\n%s', (r.headers, r.text))
+
         while r.status_code == 429:
             # We made too many requests. We wait for the next rounded minute
             current_second = datetime.now().time().strftime('%S')
@@ -151,6 +158,8 @@ class INSEECommand(GeneratingCommand):
                                  proxies=self.proxies)
             else:
                 r = requests.get(self.endpoint_informations, headers=headers)
+            if self.debug:
+                self.logger.debug('  status response %s\n%s', (r.headers, r.text))
 
         if 'Content-Type' in r.headers and r.headers['Content-Type'] == 'application/json':
             if r.status_code == 200:
@@ -189,6 +198,9 @@ class INSEECommand(GeneratingCommand):
         else:
             r = requests.get(self.endpoint_etablissement, headers=headers, params=payload)
 
+        if self.debug:
+            self.logger.debug('  siret response %s\n%s', (r.headers, r.text))
+
         while r.status_code == 429:
             # We made too many requests. We wait for the next rounded minute
             current_second = datetime.now().time().strftime('%S')
@@ -198,6 +210,8 @@ class INSEECommand(GeneratingCommand):
                                  proxies=self.proxies)
             else:
                 r = requests.get(self.endpoint_etablissement, headers=headers, params=payload)
+            if self.debug:
+                self.logger.debug('  siret response %s\n%s', (r.headers, r.text))
 
         if 'Content-Type' in r.headers and r.headers['Content-Type'] == 'application/json':
             if r.status_code == 200:
@@ -216,8 +230,7 @@ class INSEECommand(GeneratingCommand):
                 self.logger.error('  error during siret retrieval. Code received : %d', r.status_code)
         else:
             self.logger.error('  error during siret retrieval. Code received : %d', r.status_code)
-        if self.debug:
-            self.logger.debug('  response %s', r.text)
+
         raise ExceptionSiret('Error during siret retrieval')
 
     def get_updated_siret_records(self, date):
