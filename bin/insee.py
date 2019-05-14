@@ -13,6 +13,34 @@ import json
 import os
 
 
+class ExceptionStatus(Exception):
+    pass
+
+
+class ExceptionToken(Exception):
+    pass
+
+
+class ExceptionConfiguration(Exception):
+    pass
+
+
+class ExceptionSiret(Exception):
+    pass
+
+
+class ExceptionUpdatedSiret(Exception):
+    pass
+
+
+class ExceptionHeadquarters(Exception):
+    pass
+
+
+class ExceptionTranslation(Exception):
+    pass
+
+
 class Date(validators.Validator):
     """
         Validates Date option values.
@@ -57,27 +85,27 @@ class INSEECommand(GeneratingCommand):
                 conf = json.load(conf_file)
         except ValueError:
             self.logger.error('  invalid JSON configuration file')
-            exit(1)
+            raise ExceptionConfiguration('Invalid JSON in the configuration file')
         except IOError:
             self.logger.error('  configuration file doesn\'t exist')
-            exit(1)
+            raise ExceptionConfiguration('Missing configuration file')
 
         # Verify the configuration
         if self.proxy:
             if 'http_proxy' not in conf or 'https_proxy' not in conf:
                 self.logger.error('  proxies are not defined in the configuration file')
-                exit(1)
+                raise ExceptionConfiguration('Proxies are not defined in the configuration file')
             self.proxies = dict()
             self.proxies['http'] = conf['http_proxy']
             self.proxies['https'] = conf['https_proxy']
 
         if 'consumer_key' not in conf or 'consumer_secret' not in conf:
             self.logger.error('  API credentials are not defined in the configuration file')
-            exit(1)
+            raise ExceptionConfiguration('Missing API credentials in the configuration file')
 
         if 'endpoint_token' not in conf or 'endpoint_etablissement' not in conf or 'endpoint_informations' not in conf:
             self.logger.error('  API endpoints are not defined in the configuration file')
-            exit(1)
+            raise ExceptionConfiguration('Missing API endpoints in the configuration file')
 
         self.consumer_key = conf['consumer_key']
         self.consumer_secret = conf['consumer_secret']
@@ -102,7 +130,7 @@ class INSEECommand(GeneratingCommand):
                 self.logger.error('  error during token retrieval. Code received : %d', r.status_code)
         else:
             self.logger.error('  error during token retrieval. Code received : %d', r.status_code)
-        exit(1)
+        raise ExceptionToken('Error during API token retrieval')
 
     def get_status(self):
         # Initialize
@@ -135,7 +163,7 @@ class INSEECommand(GeneratingCommand):
                 self.logger.error('  error during status retrieval. Code received : %d', r.status_code)
         else:
             self.logger.error('  error during status retrieval. Code received : %d', r.status_code)
-        return None
+        raise ExceptionStatus('Error during information retrieval')
 
     def get_siret(self, q=None, nombre=None, curseur=None, champs=None, gzip=False):
         # Initialize
@@ -190,7 +218,7 @@ class INSEECommand(GeneratingCommand):
             self.logger.error('  error during siret retrieval. Code received : %d', r.status_code)
         if self.debug:
             self.logger.debug('  response %s', r.text)
-        exit(1)
+        raise ExceptionSiret('Error during siret retrieval')
 
     def get_updated_siret_records(self, date):
         # Which fields do we need
@@ -219,7 +247,7 @@ class INSEECommand(GeneratingCommand):
                     self.logger.debug('  header siret %s', header)
             except KeyError as e:
                 self.logger.error('  missing key in response from API: %s', e)
-                exit(1)
+                raise ExceptionUpdatedSiret('Error during headquarters retrieval')
 
         return updated_siret_list
 
@@ -252,7 +280,7 @@ class INSEECommand(GeneratingCommand):
                     self.logger.debug('  header siret %s', header)
             except KeyError as e:
                 self.logger.error('  missing key in response from API: %s', e)
-                exit(1)
+                raise ExceptionHeadquarters('Error during headquarters retrieval')
 
         self.logger.info('  retrieved %d of %d headquarters', len(sieges), len(siret_to_retrieve))
 
@@ -600,7 +628,7 @@ class INSEECommand(GeneratingCommand):
                 if self.debug:
                     self.logger.debug('  siret to update: %s', siret)
                     self.logger.debug('  new_siret object: %s', new_siret)
-                exit(1)
+                raise ExceptionTranslation('Error during siret translation')
             
             raw = ''.join(k+'='+'\"{0}\"'.format(v)+' ' for k, v in new_siret.items())
             event += 1
