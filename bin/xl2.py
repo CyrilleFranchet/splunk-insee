@@ -90,7 +90,7 @@ class XL2Command(ReportingCommand):
                     first = False
                 fd.write('\n')
                 yield row
-                os.fchmod(fd, stat.S_IRGRP | stat.S_IWGRP)
+                os.fchmod(fd.fileno(), stat.S_IRGRP | stat.S_IWGRP)
 
 
 dispatch(XL2Command, sys.argv, sys.stdin, sys.stdout, __name__)
