@@ -90,8 +90,8 @@ class XL2Command(ReportingCommand):
                     first = False
                 fd.write('\n')
                 yield row
-        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/sirc-%s.csv' % filename), 'a') as fd:
-            os.fchmod(fd.fileno(), stat.S_IRUSER | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
+        os.chmod(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/sirc-%s.csv' % filename),
+                 stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
 
 
 dispatch(XL2Command, sys.argv, sys.stdin, sys.stdout, __name__)
