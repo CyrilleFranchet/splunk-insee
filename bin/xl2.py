@@ -89,6 +89,7 @@ class XL2Command(ReportingCommand):
                     row[f] = v
                     first = False
                 fd.write('\n')
+                fd.flush()
                 yield row
         os.chmod(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/sirc-%s.csv' % filename),
                  stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
