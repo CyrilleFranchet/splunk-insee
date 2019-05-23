@@ -55,9 +55,6 @@ class XL2Command(ReportingCommand):
         return records
 
     def reduce(self, events):
-
-        #splunk_home = os.environ['SPLUNK_HOME']
-
         if self.dtr:
             filename = self.dtr + '_' + datetime.now().strftime('%Y%m%d%H%M%S')
         else:
@@ -105,16 +102,21 @@ class XL2Command(ReportingCommand):
                 fd.flush()
                 yield row
 
-        # ZIP the file
-        with ZipFile(zip_filename, mode='w', compression=compression) as zip_file:
-            zip_file.write(csv_filename, arcname='sirc-%s.csv' % filename)
+        if events:
+            # Delete any previous ZIP file
+            if os.path.exists(zip_filename):
+                os.remove(zip_filename)
 
-        # Give RW to the UNIX group
-        os.chmod(zip_filename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
+            # ZIP the file
+            with ZipFile(zip_filename, mode='w', compression=compression) as zip_file:
+                zip_file.write(csv_filename, arcname='sirc-%s.csv' % filename)
 
-        # Delete the CSV file
-        if os.path.exists(csv_filename):
-            os.remove(csv_filename)
+            # Give RW to the UNIX group
+            os.chmod(zip_filename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
+
+            # Delete the CSV file
+            if os.path.exists(csv_filename):
+                os.remove(csv_filename)
 
 
 dispatch(XL2Command, sys.argv, sys.stdin, sys.stdout, __name__)
