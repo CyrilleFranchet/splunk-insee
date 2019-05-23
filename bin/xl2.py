@@ -105,7 +105,7 @@ class XL2Command(ReportingCommand):
             zip_file.write(csv_filename)
 
         # Delete the CSV file
-        if os.exists(csv_filename):
+        if os.path.exists(csv_filename):
             os.remove(csv_filename)
 
         # Give RW to the UNIX group
