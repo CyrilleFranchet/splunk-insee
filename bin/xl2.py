@@ -6,6 +6,7 @@ from splunklib.searchcommands import dispatch, ReportingCommand, Configuration, 
 import os
 from datetime import date, timedelta, datetime
 import stat
+from zipfile import ZipFile
 
 
 class Date(validators.Validator):
@@ -73,9 +74,11 @@ class XL2Command(ReportingCommand):
                   '"MPRODEN";"SIRETPS";"TEL"\n')
 
         header_written = False
-
+        csv_filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/sirc-%s.csv' % filename)
+        zip_filename = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                    '../data/'+'sirene_'+''.join(self.dtr.split('-'))+'.zip')
         for event in events:
-            with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/sirc-%s.csv' % filename), 'a') as fd:
+            with open(csv_filename, 'a') as fd:
                 if not header_written:
                     fd.write(header)
                     header_written = True
@@ -91,8 +94,17 @@ class XL2Command(ReportingCommand):
                 fd.write('\n')
                 fd.flush()
                 yield row
-        os.chmod(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/sirc-%s.csv' % filename),
-                 stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
+
+        # ZIP the file
+        with ZipFile(zip_filename, mode='w') as zip_file:
+            zip_file.write(csv_filename)
+
+        # Delete the CSV file
+        if os.exists(csv_filename):
+            os.remove(csv_filename)
+
+        # Give RW to the UNIX group
+        os.chmod(zip_filename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
 
 
 dispatch(XL2Command, sys.argv, sys.stdin, sys.stdout, __name__)
