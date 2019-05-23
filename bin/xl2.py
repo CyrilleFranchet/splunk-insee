@@ -7,6 +7,7 @@ import os
 from datetime import date, timedelta, datetime
 import stat
 from zipfile import ZipFile, ZIP_DEFLATED, ZIP_STORED
+import time
 try:
     import zlib
     compression = ZIP_DEFLATED
@@ -105,9 +106,13 @@ class XL2Command(ReportingCommand):
                 fd.flush()
                 yield row
 
+        time.sleep(0.1)
+
         # ZIP the file
         with ZipFile(zip_filename, mode='w', compression=compression) as zip_file:
             zip_file.write(csv_filename, arcname='sirc-%s.csv' % filename)
+
+        time.sleep(0.1)
 
         # Give RW to the UNIX group
         os.chmod(zip_filename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
