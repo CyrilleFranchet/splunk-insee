@@ -6,7 +6,7 @@ from splunklib.searchcommands import dispatch, ReportingCommand, Configuration, 
 import os
 from datetime import date, timedelta, datetime
 import stat
-from zipfile import ZipFile
+from zipfile import ZipFile, ZIP_DEFLATED
 
 
 class Date(validators.Validator):
@@ -101,8 +101,8 @@ class XL2Command(ReportingCommand):
                 yield row
 
         # ZIP the file
-        with ZipFile(zip_filename, mode='w') as zip_file:
-            zip_file.write(csv_filename)
+        with ZipFile(zip_filename, mode='w', compression=ZIP_DEFLATED) as zip_file:
+            zip_file.write(csv_filename, arcname='sirc-%s.csv' % filename)
 
         # Delete the CSV file
         if os.path.exists(csv_filename):
