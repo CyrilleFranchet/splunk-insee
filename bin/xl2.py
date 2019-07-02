@@ -82,11 +82,9 @@ class XL2Command(ReportingCommand):
         header_written = False
         csv_filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/sirc-%s.csv' % filename)
         if self.dtr:
-            zip_filename = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                    '../data/' + 'sirene_' + ''.join(self.dtr.split('-')) + '.zip')
+            zip_filename = '/data_out/insee/' + 'sirene_' + ''.join(self.dtr.split('-')) + '.zip'
         else:
-            zip_filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/' + 'sirene_'
-                                        + (date.today() - timedelta(1)).strftime('%Y%m%d') + '.zip')
+            zip_filename = '/data_out/insee/' + 'sirene_' + (date.today() - timedelta(1)).strftime('%Y%m%d') + '.zip'
 
         for event in events:
             with open(csv_filename, 'a') as fd:
@@ -116,7 +114,7 @@ class XL2Command(ReportingCommand):
 
         # Give RW to the UNIX group
         os.chmod(zip_filename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
-
+m
         # Delete the CSV file
         if os.path.exists(csv_filename):
             os.remove(csv_filename)
