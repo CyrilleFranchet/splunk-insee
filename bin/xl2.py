@@ -80,7 +80,7 @@ class XL2Command(ReportingCommand):
                   '"MPRODEN";"SIRETPS";"TEL"\n')
 
         header_written = False
-        csv_filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data/sirc-%s.csv' % filename)
+        csv_filename = '/data_out/sirc-%s.csv' % filename
         if self.dtr:
             zip_filename = '/data_out/insee/' + 'sirene_' + ''.join(self.dtr.split('-')) + '.zip'
         else:
@@ -114,7 +114,7 @@ class XL2Command(ReportingCommand):
 
         # Give RW to the UNIX group
         os.chmod(zip_filename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
-m
+
         # Delete the CSV file
         if os.path.exists(csv_filename):
             os.remove(csv_filename)
