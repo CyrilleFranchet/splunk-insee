@@ -80,7 +80,7 @@ class XL2Command(ReportingCommand):
                   '"MPRODEN";"SIRETPS";"TEL"\n')
 
         header_written = False
-        csv_filename = '/data_out/sirc-%s.csv' % filename
+        csv_filename = '/data_out/insee/sirc-%s.csv' % filename
         if self.dtr:
             zip_filename = '/data_out/insee/' + 'sirene_' + ''.join(self.dtr.split('-')) + '.zip'
         else:
