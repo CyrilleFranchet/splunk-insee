@@ -106,17 +106,17 @@ class XL2Command(ReportingCommand):
 
         time.sleep(0.1)
 
-        # ZIP the file
-        with ZipFile(zip_filename, mode='w', compression=compression) as zip_file:
-            zip_file.write(csv_filename, arcname='sirc-%s.csv' % filename)
-
-        time.sleep(0.1)
-
-        # Give RW to the UNIX group
-        os.chmod(zip_filename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
-
-        # Delete the CSV file
         if os.path.exists(csv_filename):
+            # ZIP the file
+            with ZipFile(zip_filename, mode='w', compression=compression) as zip_file:
+                zip_file.write(csv_filename, arcname='sirc-%s.csv' % filename)
+
+            time.sleep(0.1)
+
+            # Give RW to the UNIX group
+            os.chmod(zip_filename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
+
+            # Delete the CSV file
             os.remove(csv_filename)
 
 
