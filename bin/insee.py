@@ -248,6 +248,8 @@ class INSEECommand(GeneratingCommand):
         curseur_suivant = '*'
         while curseur != curseur_suivant:
             curseur = curseur_suivant
+            # Max value for nombre is defined by INSEE and is 1000 (1 October 2019)
+            # Was defined to 10000 initially
             j = self.get_siret(q=q, curseur=curseur, nombre=1000, gzip=True)
             try:
                 header = j['header']
