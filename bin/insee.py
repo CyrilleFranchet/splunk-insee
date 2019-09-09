@@ -248,7 +248,7 @@ class INSEECommand(GeneratingCommand):
         curseur_suivant = '*'
         while curseur != curseur_suivant:
             curseur = curseur_suivant
-            j = self.get_siret(q=q, curseur=curseur, nombre=10000, gzip=True)
+            j = self.get_siret(q=q, curseur=curseur, nombre=1000, gzip=True)
             try:
                 header = j['header']
                 etablissements = j['etablissements']
