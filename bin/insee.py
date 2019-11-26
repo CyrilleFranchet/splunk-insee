@@ -61,7 +61,7 @@ class Date(validators.Validator):
         return six.text_type(value)
 
 
-@Configuration(type='eventing')
+@Configuration(type='events')
 class INSEECommand(GeneratingCommand):
     """ Synopsis
 
@@ -264,6 +264,21 @@ class INSEECommand(GeneratingCommand):
                 r = requests.get(self.endpoint_etablissement, headers=headers, params=payload)
             if self.debug:
                 self.logger.debug('  siret response %s\n%s', r.headers, r.text)
+
+        internal_error_counter = 0
+        while r.status_code == 500:
+            # In case we get a 500 we prefer to retry our request before raising an error
+            internal_error_counter += 1
+            time.sleep(60)
+            if self.proxy:
+                r = requests.get(self.endpoint_etablissement, headers=headers, params=payload,
+                                 proxies=self.proxies)
+            else:
+                r = requests.get(self.endpoint_etablissement, headers=headers, params=payload)
+            if self.debug:
+                self.logger.debug('  siret response %s\n%s', r.headers, r.text)
+            if internal_error_counter == 10:
+                break
 
         if r.headers['Content-Type'] and 'application/json' in r.headers['Content-Type']:
             if r.status_code == 200:

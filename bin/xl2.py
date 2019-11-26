@@ -36,7 +36,7 @@ class Date(validators.Validator):
         return six.text_type(value)
 
 
-@Configuration(run_in_preview=False, requires_preop=False)
+@Configuration(requires_preop=True, run_in_preview=False)
 class XL2Command(ReportingCommand):
     """ Synopsis
 
@@ -52,18 +52,38 @@ class XL2Command(ReportingCommand):
     dtr = Option(require=False, validate=Date())
 
     @Configuration()
-    def map(self, records):
-        return records
+    def map(self, events):
+        if self.dtr:
+            filename = self.dtr + '_'
+        else:
+            filename = (date.today() - timedelta(1)).strftime('%Y-%m-%d') + '_'
 
-    def reduce(self, events):
+        csv_filename = '/data_out/insee/sirc-%s.csv' % filename
 
-        #splunk_home = os.environ['SPLUNK_HOME']
+        for event in events:
+            with open(csv_filename, 'a') as fd:
+                row = {}
+                first = True
+                for f, v in event.items():
+                    if not first:
+                        fd.write(';')
+                    fd.write('"' + v + '"')
+                    row[f] = v
+                    first = False
+                fd.write('\n')
+                fd.flush()
+        yield {'dummy': 0}
 
+    def reduce(self, records):
         if self.dtr:
             filename = self.dtr + '_' + datetime.now().strftime('%Y%m%d%H%M%S')
+            old_filename = self.dtr + '_'
         else:
             filename = (date.today() - timedelta(1)).strftime('%Y-%m-%d') + '_' + \
                        datetime.now().strftime('%Y%m%d%H%M%S')
+            old_filename = (date.today() - timedelta(1)).strftime('%Y-%m-%d') + '_'
+        csv_filename = '/data_out/insee/sirc-%s.csv' % filename
+        old_csv_filename = '/data_out/insee/sirc-%s.csv' % old_filename
 
         header = ('"SIREN";"NIC";"L1_NORMALISEE";"L2_NORMALISEE";"L3_NORMALISEE";"L4_NORMALISEE";"L5_NORMALISEE";'
                   '"L6_NORMALISEE";"L7_NORMALISEE";"L1_DECLAREE";"L2_DECLAREE";"L3_DECLAREE";"L4_DECLAREE";'
@@ -79,45 +99,34 @@ class XL2Command(ReportingCommand):
                   '"MADRESSE";"MENSEIGNE";"MAPET";"MPRODET";"MAUXILT";"MNOMEN";"MSIGLE";"MNICSIEGE";"MNJ";"MAPEN";'
                   '"MPRODEN";"SIRETPS";"TEL"\n')
 
-        header_written = False
-        csv_filename = '/data_out/insee/sirc-%s.csv' % filename
-        if self.dtr:
-            zip_filename = '/data_out/insee/' + 'sirene_' + ''.join(self.dtr.split('-')) + '.zip'
-        else:
-            zip_filename = '/data_out/insee/' + 'sirene_' + (date.today() - timedelta(1)).strftime('%Y%m%d') + '.zip'
+        for record in records:
+            counter = 0
+            with open(old_csv_filename, 'r') as fin:
+                with open(csv_filename, 'w') as fout:
+                    fout.write(header)
+                    for line in fin.readlines():
+                        fout.write(line)
+                        counter += 1
 
-        for event in events:
-            with open(csv_filename, 'a') as fd:
-                if not header_written:
-                    fd.write(header)
-                    header_written = True
+            if self.dtr:
+                zip_filename = '/data_out/insee/' + 'sirene_' + ''.join(self.dtr.split('-')) + '.zip'
+            else:
+                zip_filename = '/data_out/insee/' + 'sirene_' + (date.today() - timedelta(1)).strftime('%Y%m%d') + '.zip'
 
-                row = {}
-                first = True
-                for f, v in event.items():
-                    if not first:
-                        fd.write(';')
-                    fd.write('"' + v + '"')
-                    row[f] = v
-                    first = False
-                fd.write('\n')
-                fd.flush()
-                yield row
+            if os.path.exists(csv_filename):
+                # ZIP the file
+                with ZipFile(zip_filename, mode='w', compression=compression) as zip_file:
+                    zip_file.write(csv_filename, arcname='sirc-%s.csv' % filename)
 
-        time.sleep(0.1)
+                time.sleep(0.1)
 
-        if os.path.exists(csv_filename):
-            # ZIP the file
-            with ZipFile(zip_filename, mode='w', compression=compression) as zip_file:
-                zip_file.write(csv_filename, arcname='sirc-%s.csv' % filename)
+                # Give RW to the UNIX group
+                os.chmod(zip_filename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
 
-            time.sleep(0.1)
-
-            # Give RW to the UNIX group
-            os.chmod(zip_filename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
-
-            # Delete the CSV file
-            os.remove(csv_filename)
+                # Delete the CSV files
+                os.remove(csv_filename)
+                os.remove(old_csv_filename)
+        yield {'file': zip_filename, 'records': counter}
 
 
 dispatch(XL2Command, sys.argv, sys.stdin, sys.stdout, __name__)
