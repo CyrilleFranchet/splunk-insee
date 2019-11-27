@@ -108,6 +108,8 @@ class XL2Command(ReportingCommand):
                         fout.write(line)
                         counter += 1
 
+            time.sleep(1)
+            
             if self.dtr:
                 zip_filename = '/data_out/insee/' + 'sirene_' + ''.join(self.dtr.split('-')) + '.zip'
             else:
@@ -118,7 +120,7 @@ class XL2Command(ReportingCommand):
                 with ZipFile(zip_filename, mode='w', compression=compression) as zip_file:
                     zip_file.write(csv_filename, arcname='sirc-%s.csv' % filename)
 
-                time.sleep(0.1)
+                time.sleep(1)
 
                 # Give RW to the UNIX group
                 os.chmod(zip_filename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
