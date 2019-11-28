@@ -109,7 +109,7 @@ class XL2Command(ReportingCommand):
                         counter += 1
 
             time.sleep(1)
-            
+
             if self.dtr:
                 zip_filename = '/data_out/insee/' + 'sirene_' + ''.join(self.dtr.split('-')) + '.zip'
             else:
