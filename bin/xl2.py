@@ -134,8 +134,8 @@ class XL2Command(ReportingCommand):
                     # Delete the CSV file
                     os.remove(csv_filename)
 
-        else:
-            zip_filename = 'Not ZIP file generated. Error during creation.'
+            else:
+                zip_filename = 'Not ZIP file generated. Error during creation.'
 
         yield {'file': zip_filename, 'records': counter}
 
