@@ -69,73 +69,88 @@ class XL2Command(ReportingCommand):
 
     @Configuration()
     def map(self, events):
-        if self.dtr:
-            filename = self.dtr + '_'
-        else:
-            filename = (date.today() - timedelta(1)).strftime('%Y-%m-%d') + '_'
+        try:
+            if self.dtr:
+                filename = self.dtr + '_'
+            else:
+                filename = (date.today() - timedelta(1)).strftime('%Y-%m-%d') + '_'
 
-        csv_filename = '/data_out/insee/sirc-%s.csv' % filename
+            csv_filename = '/data_out/insee/sirc-%s.csv' % filename
 
-        for event in events:
-            with open(csv_filename, 'a') as fd:
-                first = True
-                for e in self.header:
-                    if not first:
-                        fd.write(';')
-                    fd.write('"' + event[e] + '"')
-                    first = False
-                fd.write('\n')
-                fd.flush()
+            for event in events:
+                with open(csv_filename, 'a') as fd:
+                    first = True
+                    for e in self.header:
+                        if not first:
+                            fd.write(';')
+                        fd.write('"' + event[e] + '"')
+                        first = False
+                    fd.write('\n')
+                    fd.flush()
+
+        # This is a bad practise, but we want a specific message in log file
+        # This case means that the code is missing an Exception handling
+        except Exception as e:
+            self.logger.error('  unhandled exception has occurred. Traceback is in splunklib.log: %s', e.message)
+            raise
+
         yield {'dummy': 0}
 
     def reduce(self, records):
-        if self.dtr:
-            filename = self.dtr + '_' + datetime.now().strftime('%Y%m%d%H%M%S')
-            old_filename = self.dtr + '_'
-        else:
-            filename = (date.today() - timedelta(1)).strftime('%Y-%m-%d') + '_' + \
-                       datetime.now().strftime('%Y%m%d%H%M%S')
-            old_filename = (date.today() - timedelta(1)).strftime('%Y-%m-%d') + '_'
-        csv_filename = '/data_out/insee/sirc-%s.csv' % filename
-        old_csv_filename = '/data_out/insee/sirc-%s.csv' % old_filename
+        try:
+            if self.dtr:
+                filename = self.dtr + '_' + datetime.now().strftime('%Y%m%d%H%M%S')
+                old_filename = self.dtr + '_'
+            else:
+                filename = (date.today() - timedelta(1)).strftime('%Y-%m-%d') + '_' + \
+                           datetime.now().strftime('%Y%m%d%H%M%S')
+                old_filename = (date.today() - timedelta(1)).strftime('%Y-%m-%d') + '_'
+            csv_filename = '/data_out/insee/sirc-%s.csv' % filename
+            old_csv_filename = '/data_out/insee/sirc-%s.csv' % old_filename
 
-        for _ in records:
-            counter = 0
-            if os.path.exists(old_csv_filename):
-                with open(old_csv_filename, 'r') as fin:
-                    with open(csv_filename, 'w') as fout:
-                        fout.write(self.return_header())
-                        fout.write('\n')
-                        for line in fin.readlines():
-                            fout.write(line)
-                            counter += 1
-
-                time.sleep(1)
-
-                # Delete the first CSV file
+            for _ in records:
+                counter = 0
                 if os.path.exists(old_csv_filename):
-                    os.remove(old_csv_filename)
-
-                if self.dtr:
-                    zip_filename = '/data_out/insee/' + 'sirene_' + ''.join(self.dtr.split('-')) + '.zip'
-                else:
-                    zip_filename = '/data_out/insee/' + 'sirene_' + (date.today() - timedelta(1)).strftime('%Y%m%d') + '.zip'
-
-                if os.path.exists(csv_filename):
-                    # ZIP the file
-                    with ZipFile(zip_filename, mode='w', compression=compression) as zip_file:
-                        zip_file.write(csv_filename, arcname='sirc-%s.csv' % filename)
+                    with open(old_csv_filename, 'r') as fin:
+                        with open(csv_filename, 'w') as fout:
+                            fout.write(self.return_header())
+                            fout.write('\n')
+                            for line in fin.readlines():
+                                fout.write(line)
+                                counter += 1
 
                     time.sleep(1)
 
-                    # Give RW to the UNIX group
-                    os.chmod(zip_filename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
+                    # Delete the first CSV file
+                    if os.path.exists(old_csv_filename):
+                        os.remove(old_csv_filename)
 
-                    # Delete the CSV file
-                    os.remove(csv_filename)
+                    if self.dtr:
+                        zip_filename = '/data_out/insee/' + 'sirene_' + ''.join(self.dtr.split('-')) + '.zip'
+                    else:
+                        zip_filename = '/data_out/insee/' + 'sirene_' + (date.today() - timedelta(1)).strftime('%Y%m%d') + '.zip'
 
-            else:
-                zip_filename = 'Not ZIP file generated. Error during creation.'
+                    if os.path.exists(csv_filename):
+                        # ZIP the file
+                        with ZipFile(zip_filename, mode='w', compression=compression, allowZip64=True) as zip_file:
+                            zip_file.write(csv_filename, arcname='sirc-%s.csv' % filename)
+
+                        time.sleep(1)
+
+                        # Give RW to the UNIX group
+                        os.chmod(zip_filename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
+
+                        # Delete the CSV file
+                        os.remove(csv_filename)
+
+                else:
+                    zip_filename = 'Not ZIP file generated. Error during creation.'
+
+        # This is a bad practise, but we want a specific message in log file
+        # This case means that the code is missing an Exception handling
+        except Exception as e:
+            self.logger.error('  unhandled exception has occurred. Traceback is in splunklib.log: %s', e.message)
+            raise
 
         yield {'file': zip_filename, 'records': counter}
 
