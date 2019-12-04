@@ -3,7 +3,7 @@ L’application Splunk INSEE a été développée afin de permettre la migration
 Les anciens fichiers XL2 contenaient les mises à jour journalières fournies par l’INSEE. Aujourd’hui, l’API SIRENE permet seulement d’avoir une photo à un instant t.
 
 # Fonctionnement de l'application
-L’application INSEE fournit deux nouvelles « custom commands » aux utilsateurs de l’application Splunk.
+L’application INSEE fournit deux nouvelles « custom commands » aux utilisateurs de l’application Splunk.
 
 ## Commande insee
 Commande génératrice d’événements qui interroge l’API SIRENE pour obtenir les établissements qui ont été modifiés à une date donnée.
@@ -39,11 +39,14 @@ Les URL de l'API permettent de modifier les URL des endpoints si l'INSEE les mod
 ## Commande xl2
 Commande de rapport prenant des évènements Splunk en entrée pour les inscrire dans un fichier CSV dans un format où les colonnes sont séparées par des « ; » et où les valeurs sont entre «"».
 
+NB : la fonction map() de la commande xl2 est appelée à chaque chunck de données (50.000 événements par défaut) et elle inscrit les données dans un CSV temporaire en mode append.0
+La fonction reduce() de la commande xl2 est appelée une fois à la fin de la récupération afin d'écrire un fichier final avec l'entête et les données précédemment récupérées et sous forme de ZIP.
+
 La commande accepte un paramètre optionnel :
 - **dtr** : date des données au format AAAA-MM-JJ. Le script utilise automatiquement la date de la veille si ce paramètre est omis. Cette date est utilisée pour horodater le fichier CSV en sortie. Les fichiers CSV sont enregistrés dans le répertoire $SPLUNK_HOME/var/run/splunk/csv/.
 
 # Utilisation de lookups
-Toutes les données ne sont pas extraites depuis l'API SIRENE. Certaines données sont récupérées à travers des fichiers CSV fournis par l'INSEE. L'appliation Splunk utilise trois lookups :
+Toutes les données ne sont pas extraites depuis l'API SIRENE. Certaines données sont récupérées à travers des fichiers CSV fournis par l'INSEE. L'application Splunk utilise trois lookups :
 - **naf.csv** : contient les libellés des codes NAF correspondants ;
 - **nj.csv** :  contient les libellés des statuts juridiques ;
 - **pays.csv** : contient les codes des pays étrangers.
@@ -60,7 +63,7 @@ Splunk nécessite que la première ligne de ces fichiers soit positionnée à la
 # Recherche type
 La recherche suivante permet de récupérer les données de la veille et de les enregistrer dans un fichier CSV dont le nom est horodaté à la date de la veille.
 ```
-| insee proxy=true | extract limit=200 maxchars=100000 | lookup csv_naf ID as LIBAPET output LIBELLE as LIBAPET | lookup csv_naf ID as LIBAPEN output LIBELLE as LIBAPEN | lookup csv_nj ID as LIBNJ output LIBELLE as LIBNJ | lookup csv_pays CODE AS L7_NORMALISEE output PAYS as L7_NORMALISEE_2 | eval L7_NORMALISEE=coalesce(L7_NORMALISEE_2,L7_NORMALISEE) | fields - _time _raw event_no _kv | fields SIREN,NIC,L1_NORMALISEE,L2_NORMALISEE,L3_NORMALISEE,L4_NORMALISEE,L5_NORMALISEE,L6_NORMALISEE,L7_NORMALISEE,L1_DECLAREE,L2_DECLAREE,L3_DECLAREE,L4_DECLAREE,L5_DECLAREE,L6_DECLAREE,L7_DECLAREE,NUMVOIE,INDREP,TYPVOIE,LIBVOIE,CODPOS,CEDEX,RPET,LIBREG,DEPET,ARRONET,CTONET,COMET,LIBCOM,DU,TU,UU,EPCI,TCD,ZEMET,SIEGE,ENSEIGNE,IND_PUBLIPO,DIFFCOM,AMINTRET,NATETAB,LIBNATETAB,APET700,LIBAPET,DAPET,TEFET,LIBTEFET,EFETCENT,DEFET,ORIGINE,DCRET,DDEBACT,ACTIVNAT,LIEUACT,ACTISURF,SAISONAT,MODET,PRODET,PRODPART,AUXILT,NOMEN_LONG,SIGLE,NOM,PRENOM,CIVILITE,RNA,NICSIEGE,RPEN,DEPCOMEN,ADR_MAIL,NJ,LIBNJ,APEN700,LIBAPEN,DAPEN,APRM,ESS,DATEESS,TEFEN,LIBTEFEN,EFENCENT,DEFEN,CATEGORIE,DCREN,AMINTREN,MONOACT,MODEN,PRODEN,ESAANN,TCA,ESAAPEN,ESASEC1N,ESASEC2N,ESASEC3N,ESASEC4N,VMAJ,VMAJ1,VMAJ2,VMAJ3,DATEMAJ,EVE,DATEVE,TYPCREH,DREACTET,DREACTEN,MADRESSE,MENSEIGNE,MAPET,MPRODET,MAUXILT,MNOMEN,MSIGLE,MNICSIEGE,MNJ,MAPEN,MPRODEN,SIRETPS,TEL | xl2
+| insee proxy=true | extract limit=200 maxchars=100000 | lookup csv_naf ID as LIBAPET output LIBELLE as LIBAPET | lookup csv_naf ID as LIBAPEN output LIBELLE as LIBAPEN | lookup csv_nj ID as LIBNJ output LIBELLE as LIBNJ | lookup csv_pays CODE AS L7_NORMALISEE output PAYS as L7_NORMALISEE_2 | eval L7_NORMALISEE=coalesce(L7_NORMALISEE_2,L7_NORMALISEE) | xl2
 ```
 
 ## Détails de la commande
@@ -93,14 +96,6 @@ Splunk ouvre le fichier csv_pays.csv et cherche la valeur L7_NORMALISEE dans la 
 
 Splunk positionne la valeur de L7_NORMALISEE à la valeur de L7_NORMALISEE_2 si ce champ n'est pas nul. Si ce n'est pas le cas, Splunk utilise la valeur de L7_NORMALISEE.
 
-```| fields - _time _raw event_no _kv```
-
-Il est indiqué à Splunk de ne pas conserver les champs _time, _raw event_no et _kv afin de ne pas les inclure dans le CSV final.
-
-```| fields SIREN,NIC,L1_NORMALISEE,L2_NORMALISEE,L3_NORMALISEE,L4_NORMALISEE,L5_NORMALISEE,L6_NORMALISEE,L7_NORMALISEE,L1_DECLAREE,L2_DECLAREE,L3_DECLAREE,L4_DECLAREE,L5_DECLAREE,L6_DECLAREE,L7_DECLAREE,NUMVOIE,INDREP,TYPVOIE,LIBVOIE,CODPOS,CEDEX,RPET,LIBREG,DEPET,ARRONET,CTONET,COMET,LIBCOM,DU,TU,UU,EPCI,TCD,ZEMET,SIEGE,ENSEIGNE,IND_PUBLIPO,DIFFCOM,AMINTRET,NATETAB,LIBNATETAB,APET700,LIBAPET,DAPET,TEFET,LIBTEFET,EFETCENT,DEFET,ORIGINE,DCRET,DDEBACT,ACTIVNAT,LIEUACT,ACTISURF,SAISONAT,MODET,PRODET,PRODPART,AUXILT,NOMEN_LONG,SIGLE,NOM,PRENOM,CIVILITE,RNA,NICSIEGE,RPEN,DEPCOMEN,ADR_MAIL,NJ,LIBNJ,APEN700,LIBAPEN,DAPEN,APRM,ESS,DATEESS,TEFEN,LIBTEFEN,EFENCENT,DEFEN,CATEGORIE,DCREN,AMINTREN,MONOACT,MODEN,PRODEN,ESAANN,TCA,ESAAPEN,ESASEC1N,ESASEC2N,ESASEC3N,ESASEC4N,VMAJ,VMAJ1,VMAJ2,VMAJ3,DATEMAJ,EVE,DATEVE,TYPCREH,DREACTET,DREACTEN,MADRESSE,MENSEIGNE,MAPET,MPRODET,MAUXILT,MNOMEN,MSIGLE,MNICSIEGE,MNJ,MAPEN,MPRODEN,SIRETPS,TEL```
-
-Les champs sont réordonnés afin de correspondre à l'ordre des colonnes du fichier CSV final.
-
 ```| xl2```
 
 La commande xl2 est appelée afin d'écrire les résultats dans le fichier CSV final en séparant les champs par un ";" et en entourant les valeurs avec le caractère ".
@@ -115,7 +110,7 @@ Il est important de comprendre que l'API est mise à jour quotidiennement par l'
 
 Le script cherche ensuite dans cette liste de SIRET si ces établissements sont des sièges de l'unité légale. Dans la négative, le script se charge de récupérer les établissements sièges qui sont manquants, ceci lui permettant de récupérer l'adresse de l'établissement siège.
 Le script implémente cette interrogation avec des query q (voir documentation du service SIRENE) à base de requêtes GET car elles étaient la seule solution à l'ouverture du service. Il existe depuis une version à base de requêtes POST (voir documentation du service SIRENE).
-Cette interrogation à base de GET est limité en taille et donc le script est obligé de multiplier les requêtes pour récupérer une liste importante d'établissements siège. Il est important de rappeler que le nombre de requêtes par minute est limité à 30.
+Cette interrogation à base de GET est limitée en taille et donc le script est obligé de multiplier les requêtes pour récupérer une liste importante d'établissements siège. Il est important de rappeler que le nombre de requêtes par minute est limité à 30.
 
 Le script traite ensuite les données pour produire les évènements Splunk qui sont attendus.
 
@@ -144,32 +139,104 @@ De plus, si la commande fonctionne correctement, elle inscrit les informations s
 - les éventuels établissements dont le siège pose un problème ;
 - le nombre d'évènements finalement générés dans Splunk. Ce nombre doit être égal au nombre d'établissements modifiés à la date demandée.
 
+NB : les siret sont récupérés par bloc de 1000 afin de pouvoir traiter un volume conséquent de données.
+Il est toutefois important de souligner que Splunk attend que la commande insee.py se termine avant de continuer le pipeline d'exécution.
+Il faut juste éviter que Python manipule des millions d'objet en mémoire vive.
+
 ```
-2019-04-18 06:01:08,770, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=622,   found 4919 SIRET to delete
-2019-04-18 06:01:08,770, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=621,   found 12816 SIRET to create
-2019-04-18 06:01:08,770, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=620,   generated 17735 events
-2019-04-18 06:01:04,367, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=531,   siret 38375385200029 has an invalid headquarter 38375385200037
-2019-04-18 06:01:03,999, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=268,   retrieved 2948 of 2949 headquarters
-2019-04-18 06:00:13,999, Level=INFO, Pid=3121, Logger=INSEECommand, File=insee.py, Line=373,   retrieved 17735 siret to update
+2019-12-04 12:21:38,370, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=621,   versionService 3.8.3
+2019-12-04 12:21:38,371, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=640,   collection Unités Légales dateDerniereMiseADisposition 2019-12-03T23:44:34 dateDernierTraitementDeMasse 2019-06-24 dateDernierTraitementMaximum 2019-12-03T22:31:35
+2019-12-04 12:21:38,371, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=640,   collection Établissements dateDerniereMiseADisposition 2019-12-04T00:28:03 dateDernierTraitementDeMasse 2019-06-24 dateDernierTraitementMaximum 2019-12-03T22:31:35
+2019-12-04 12:21:38,371, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=640,   collection Liens de succession dateDerniereMiseADisposition 2019-12-04T00:28:29 dateDernierTraitementMaximum 2019-12-03T20:38:54
+2019-12-04 12:21:39,959, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=657,   retrieved a total of 20806 siret to update
+2019-12-04 12:21:39,960, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 1000 siret to update in this window
+2019-12-04 12:21:39,960, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 1000 siret / 20806
+2019-12-04 12:21:42,027, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 311 of 311 headquarters
+2019-12-04 12:21:43,909, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 1000 siret to update in this window
+2019-12-04 12:21:43,910, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 2000 siret / 20806
+2019-12-04 12:21:48,817, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 323 of 323 headquarters
+2019-12-04 12:21:50,617, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 1000 siret to update in this window
+2019-12-04 12:21:50,617, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 3000 siret / 20806
+2019-12-04 12:21:52,226, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 337 of 337 headquarters
+2019-12-04 12:21:54,344, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 1000 siret to update in this window
+2019-12-04 12:21:54,345, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 4000 siret / 20806
+2019-12-04 12:21:55,902, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 268 of 268 headquarters
+2019-12-04 12:21:57,704, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 1000 siret to update in this window
+2019-12-04 12:21:57,704, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 5000 siret / 20806
+2019-12-04 12:21:58,124, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 73 of 73 headquarters
+2019-12-04 12:21:59,755, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 1000 siret to update in this window
+2019-12-04 12:21:59,755, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 6000 siret / 20806
+2019-12-04 12:22:00,102, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 8 of 8 headquarters
+2019-12-04 12:22:01,784, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 1000 siret to update in this window
+2019-12-04 12:22:01,784, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 7000 siret / 20806
+2019-12-04 12:22:02,137, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 6 of 6 headquarters
+2019-12-04 12:22:03,746, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 1000 siret to update in this window
+2019-12-04 12:22:03,746, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 8000 siret / 20806
+2019-12-04 12:22:04,090, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 5 of 5 headquarters
+2019-12-04 12:22:05,846, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 1000 siret to update in this window
+2019-12-04 12:22:05,846, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 9000 siret / 20806
+2019-12-04 12:22:06,199, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 5 of 5 headquarters
+2019-12-04 12:22:07,827, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 1000 siret to update in this window
+2019-12-04 12:22:07,827, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 10000 siret / 20806
+2019-12-04 12:22:08,180, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 7 of 7 headquarters
+2019-12-04 12:22:09,838, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 1000 siret to update in this window
+2019-12-04 12:22:09,838, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 11000 siret / 20806
+2019-12-04 12:22:10,209, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 3 of 3 headquarters
+2019-12-04 12:22:11,852, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 1000 siret to update in this window
+2019-12-04 12:22:11,852, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 12000 siret / 20806
+2019-12-04 12:22:12,245, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 8 of 8 headquarters
+2019-12-04 12:22:14,503, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 1000 siret to update in this window
+2019-12-04 12:22:14,503, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 13000 siret / 20806
+2019-12-04 12:22:14,895, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 1 of 1 headquarters
+2019-12-04 12:22:16,654, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 1000 siret to update in this window
+2019-12-04 12:22:16,655, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 14000 siret / 20806
+2019-12-04 12:22:17,018, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 1 of 1 headquarters
+2019-12-04 12:22:18,602, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 1000 siret to update in this window
+2019-12-04 12:22:18,603, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 15000 siret / 20806
+2019-12-04 12:22:18,964, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 3 of 3 headquarters
+2019-12-04 12:22:20,590, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 1000 siret to update in this window
+2019-12-04 12:22:20,590, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 16000 siret / 20806
+2019-12-04 12:22:20,933, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 1 of 1 headquarters
+2019-12-04 12:22:22,929, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 1000 siret to update in this window
+2019-12-04 12:22:22,929, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 17000 siret / 20806
+2019-12-04 12:22:23,287, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 1 of 1 headquarters
+2019-12-04 12:22:24,860, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 1000 siret to update in this window
+2019-12-04 12:22:24,860, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 18000 siret / 20806
+2019-12-04 12:22:25,226, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 5 of 5 headquarters
+2019-12-04 12:22:26,963, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 1000 siret to update in this window
+2019-12-04 12:22:26,963, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 19000 siret / 20806
+2019-12-04 12:22:27,307, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 2 of 2 headquarters
+2019-12-04 12:22:29,073, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 1000 siret to update in this window
+2019-12-04 12:22:29,073, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 20000 siret / 20806
+2019-12-04 12:22:29,433, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 10 of 10 headquarters
+2019-12-04 12:22:30,824, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 806 siret to update in this window
+2019-12-04 12:22:30,824, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 20806 siret / 20806
+2019-12-04 12:22:31,187, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 5 of 5 headquarters
+2019-12-04 12:22:31,794, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=659,   retrieved 0 siret to update in this window
+2019-12-04 12:22:31,795, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=661,   retrieved 20806 siret / 20806
+2019-12-04 12:22:31,795, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=361,   retrieved 0 of 0 headquarters
+2019-12-04 12:22:31,795, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=682,   generated 20806 events
+2019-12-04 12:22:31,795, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=683,   found 19853 SIRET to create
+2019-12-04 12:22:31,795, Level=INFO, Pid=32337, Logger=INSEECommand, File=insee.py, Line=684,   found 953 SIRET to delete
 ```
 
 Il apparaît à l'usage que l'INSEE ne met pas toujours les données à disposition en temps et en heure. Dans ce cas, le script ne fonctionne pas car les données sont inexistantes.
 L'exemple ci-dessous montre ce type d'erreur dans les journaux.
 
 ```
-2019-04-25 06:00:03,255, Level=ERROR, Pid=18233, Logger=INSEECommand, File=insee.py, Line=175,   unknown siret: Aucun élément trouvé pour q=dateDernierTraitementEtablissement:2019-04-24
-2019-04-25 06:00:02,874, Level=INFO, Pid=18233, Logger=INSEECommand, File=insee.py, Line=362,   collection Liens de succession dateDerniereMiseADisposition 2019-04-23T23:37:03 dateDernierTraitementMaximum 2019-04-23T21:06:08 
-2019-04-25 06:00:02,874, Level=INFO, Pid=18233, Logger=INSEECommand, File=insee.py, Line=362,   collection Établissements dateDerniereMiseADisposition 2019-04-23T23:36:42 dateDernierTraitementDeMasse 2018-09-30 dateDernierTraitementMaximum 2019-04-23T21:28:48 
-2019-04-25 06:00:02,873, Level=INFO, Pid=18233, Logger=INSEECommand, File=insee.py, Line=362,   collection Unités Légales dateDerniereMiseADisposition 2019-04-23T23:12:57 dateDernierTraitementDeMasse 2018-09-30 dateDernierTraitementMaximum 2019-04-23T21:28:48 
-2019-04-25 06:00:02,872, Level=INFO, Pid=18233, Logger=INSEECommand, File=insee.py, Line=343,   versionService 3.6.3
+2019-12-04 12:22:57,326, Level=INFO, Pid=32489, Logger=INSEECommand, File=insee.py, Line=621,   versionService 3.8.3
+2019-12-04 12:22:57,327, Level=INFO, Pid=32489, Logger=INSEECommand, File=insee.py, Line=640,   collection Unités Légales dateDerniereMiseADisposition 2019-12-03T23:44:34 dateDernierTraitementDeMasse 2019-06-24 dateDernierTraitementMaximum 2019-12-03T22:31:35
+2019-12-04 12:22:57,327, Level=INFO, Pid=32489, Logger=INSEECommand, File=insee.py, Line=640,   collection Établissements dateDerniereMiseADisposition 2019-12-04T00:28:03 dateDernierTraitementDeMasse 2019-06-24 dateDernierTraitementMaximum 2019-12-03T22:31:35
+2019-12-04 12:22:57,328, Level=INFO, Pid=32489, Logger=INSEECommand, File=insee.py, Line=640,   collection Liens de succession dateDerniereMiseADisposition 2019-12-04T00:28:29 dateDernierTraitementMaximum 2019-12-03T20:38:54
+2019-12-04 12:22:57,678, Level=ERROR, Pid=32489, Logger=INSEECommand, File=insee.py, Line=291,   unknown siret: Aucun élément trouvé pour q=dateDernierTraitementEtablissement:2019-12-04
 ```
 
 Ici, l'information importante est :
 ```
-Aucun élément trouvé pour q=dateDernierTraitementEtablissement:2019-04-24
+Aucun élément trouvé pour q=dateDernierTraitementEtablissement:2019-12-04
 ```
 
-Ceci se confirme par le fait que la date dateDerniereMiseADisposition est positionnée au 2019-04-23T23:36:42.
+Ceci se confirme par le fait que la date dateDerniereMiseADisposition est positionnée au 2019-12-04T00:28:03.
 Dans tel cas, il est nécessaire de relancer la commande manuellement en suivant le paragraphe suivant. Il peut aussi être judicieux de modifier l'heure d'exécution de la recherche sur Splunk.
 
 La commande INSEE journalise des messages avec trois niveaux de criticité :
@@ -192,7 +259,7 @@ Voici la liste de ces exceptions :
 - ExceptionToken : problème rencontré lors de l'interrogation du endpoint token de l'API SIRENE ;
 - ExceptionConfiguration : problème rencontré lors du chargement du fichier de configuration JSON.
 
-A noter, que le code Python de la commande insee.py attrape toutes les exceptions Python qui ne sont pas gérées.
+A noter, que le code Python des commandes insee.py et xl2.py attrape toutes les exceptions Python qui ne sont pas gérées.
 
 Dans tel cas, ce genre de message est inscrit dans le fichier de journalisation insee.log :
 ```
@@ -209,7 +276,7 @@ Toutes les journées doivent être récupérées manuellement en spécifiant la 
 Exemple, ici nous récupérons manuellement la date du 13 avril 2019 :
 
 ```
-| insee dtr=2019-04-13 proxy=true | extract limit=200 maxchars=100000 | lookup csv_naf ID as LIBAPET output LIBELLE as LIBAPET | lookup csv_naf ID as LIBAPEN output LIBELLE as LIBAPEN | lookup csv_nj ID as LIBNJ output LIBELLE as LIBNJ | lookup csv_pays CODE AS L7_NORMALISEE output PAYS as L7_NORMALISEE_2 | eval L7_NORMALISEE=coalesce(L7_NORMALISEE_2,L7_NORMALISEE) | fields - _time _raw event_no _kv | fields SIREN,NIC,L1_NORMALISEE,L2_NORMALISEE,L3_NORMALISEE,L4_NORMALISEE,L5_NORMALISEE,L6_NORMALISEE,L7_NORMALISEE,L1_DECLAREE,L2_DECLAREE,L3_DECLAREE,L4_DECLAREE,L5_DECLAREE,L6_DECLAREE,L7_DECLAREE,NUMVOIE,INDREP,TYPVOIE,LIBVOIE,CODPOS,CEDEX,RPET,LIBREG,DEPET,ARRONET,CTONET,COMET,LIBCOM,DU,TU,UU,EPCI,TCD,ZEMET,SIEGE,ENSEIGNE,IND_PUBLIPO,DIFFCOM,AMINTRET,NATETAB,LIBNATETAB,APET700,LIBAPET,DAPET,TEFET,LIBTEFET,EFETCENT,DEFET,ORIGINE,DCRET,DDEBACT,ACTIVNAT,LIEUACT,ACTISURF,SAISONAT,MODET,PRODET,PRODPART,AUXILT,NOMEN_LONG,SIGLE,NOM,PRENOM,CIVILITE,RNA,NICSIEGE,RPEN,DEPCOMEN,ADR_MAIL,NJ,LIBNJ,APEN700,LIBAPEN,DAPEN,APRM,ESS,DATEESS,TEFEN,LIBTEFEN,EFENCENT,DEFEN,CATEGORIE,DCREN,AMINTREN,MONOACT,MODEN,PRODEN,ESAANN,TCA,ESAAPEN,ESASEC1N,ESASEC2N,ESASEC3N,ESASEC4N,VMAJ,VMAJ1,VMAJ2,VMAJ3,DATEMAJ,EVE,DATEVE,TYPCREH,DREACTET,DREACTEN,MADRESSE,MENSEIGNE,MAPET,MPRODET,MAUXILT,MNOMEN,MSIGLE,MNICSIEGE,MNJ,MAPEN,MPRODEN,SIRETPS,TEL | xl2 dtr=2019-04-13
+| insee dtr=2019-04-13 proxy=true | extract limit=200 maxchars=100000 | lookup csv_naf ID as LIBAPET output LIBELLE as LIBAPET | lookup csv_naf ID as LIBAPEN output LIBELLE as LIBAPEN | lookup csv_nj ID as LIBNJ output LIBELLE as LIBNJ | lookup csv_pays CODE AS L7_NORMALISEE output PAYS as L7_NORMALISEE_2 | eval L7_NORMALISEE=coalesce(L7_NORMALISEE_2,L7_NORMALISEE) | xl2 dtr=2019-04-13
 ```
 
 A noter, qu'il n'est pas nécessaire de configurer le time range de Splunk. La commande est pleinement autonome.
