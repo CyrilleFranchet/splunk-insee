@@ -110,29 +110,32 @@ class XL2Command(ReportingCommand):
                             fout.write(line)
                             counter += 1
 
-            time.sleep(1)
-
-            # Delete the first CSV file
-            if os.path.exists(old_csv_filename):
-                os.remove(old_csv_filename)
-
-            if self.dtr:
-                zip_filename = '/data_out/insee/' + 'sirene_' + ''.join(self.dtr.split('-')) + '.zip'
-            else:
-                zip_filename = '/data_out/insee/' + 'sirene_' + (date.today() - timedelta(1)).strftime('%Y%m%d') + '.zip'
-
-            if os.path.exists(csv_filename):
-                # ZIP the file
-                with ZipFile(zip_filename, mode='w', compression=compression) as zip_file:
-                    zip_file.write(csv_filename, arcname='sirc-%s.csv' % filename)
-
                 time.sleep(1)
 
-                # Give RW to the UNIX group
-                os.chmod(zip_filename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
+                # Delete the first CSV file
+                if os.path.exists(old_csv_filename):
+                    os.remove(old_csv_filename)
 
-                # Delete the CSV file
-                os.remove(csv_filename)
+                if self.dtr:
+                    zip_filename = '/data_out/insee/' + 'sirene_' + ''.join(self.dtr.split('-')) + '.zip'
+                else:
+                    zip_filename = '/data_out/insee/' + 'sirene_' + (date.today() - timedelta(1)).strftime('%Y%m%d') + '.zip'
+
+                if os.path.exists(csv_filename):
+                    # ZIP the file
+                    with ZipFile(zip_filename, mode='w', compression=compression) as zip_file:
+                        zip_file.write(csv_filename, arcname='sirc-%s.csv' % filename)
+
+                    time.sleep(1)
+
+                    # Give RW to the UNIX group
+                    os.chmod(zip_filename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
+
+                    # Delete the CSV file
+                    os.remove(csv_filename)
+
+        else:
+            zip_filename = 'Not ZIP file generated. Error during creation.'
 
         yield {'file': zip_filename, 'records': counter}
 
