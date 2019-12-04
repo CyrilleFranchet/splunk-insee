@@ -101,13 +101,14 @@ class XL2Command(ReportingCommand):
 
         for _ in records:
             counter = 0
-            with open(old_csv_filename, 'r') as fin:
-                with open(csv_filename, 'w') as fout:
-                    fout.write(self.return_header())
-                    fout.write('\n')
-                    for line in fin.readlines():
-                        fout.write(line)
-                        counter += 1
+            if os.path.exists(old_csv_filename):
+                with open(old_csv_filename, 'r') as fin:
+                    with open(csv_filename, 'w') as fout:
+                        fout.write(self.return_header())
+                        fout.write('\n')
+                        for line in fin.readlines():
+                            fout.write(line)
+                            counter += 1
 
             time.sleep(1)
 
