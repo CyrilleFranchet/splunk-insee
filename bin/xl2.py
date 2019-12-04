@@ -50,6 +50,22 @@ class XL2Command(ReportingCommand):
 
     """
     dtr = Option(require=False, validate=Date())
+    header = ['SIREN','NIC','L1_NORMALISEE','L2_NORMALISEE','L3_NORMALISEE','L4_NORMALISEE','L5_NORMALISEE',
+              'L6_NORMALISEE','L7_NORMALISEE','L1_DECLAREE','L2_DECLAREE','L3_DECLAREE','L4_DECLAREE',
+              'L5_DECLAREE','L6_DECLAREE','L7_DECLAREE','NUMVOIE','INDREP','TYPVOIE','LIBVOIE','CODPOS','CEDEX',
+              'RPET','LIBREG','DEPET','ARRONET','CTONET','COMET','LIBCOM','DU','TU','UU','EPCI','TCD','ZEMET',
+              'SIEGE','ENSEIGNE','IND_PUBLIPO','DIFFCOM','AMINTRET','NATETAB','LIBNATETAB','APET700','LIBAPET',
+              'DAPET','TEFET','LIBTEFET','EFETCENT','DEFET','ORIGINE','DCRET','DDEBACT','ACTIVNAT','LIEUACT',
+              'ACTISURF','SAISONAT','MODET','PRODET','PRODPART','AUXILT','NOMEN_LONG','SIGLE','NOM','PRENOM',
+              'CIVILITE','RNA','NICSIEGE','RPEN','DEPCOMEN','ADR_MAIL','NJ','LIBNJ','APEN700','LIBAPEN','DAPEN',
+              'APRM','ESS','DATEESS','TEFEN','LIBTEFEN','EFENCENT','DEFEN','CATEGORIE','DCREN','AMINTREN',
+              'MONOACT','MODEN','PRODEN','ESAANN','TCA','ESAAPEN','ESASEC1N','ESASEC2N','ESASEC3N','ESASEC4N',
+              'VMAJ','VMAJ1','VMAJ2','VMAJ3','DATEMAJ','EVE','DATEVE','TYPCREH','DREACTET','DREACTEN',
+              'MADRESSE','MENSEIGNE','MAPET','MPRODET','MAUXILT','MNOMEN','MSIGLE','MNICSIEGE','MNJ','MAPEN',
+              'MPRODEN','SIRETPS','TEL']
+
+    def return_header(self):
+        return ''.join(map(lambda x: '"%s";' % x, self.header))[:-1]
 
     @Configuration()
     def map(self, events):
@@ -62,13 +78,11 @@ class XL2Command(ReportingCommand):
 
         for event in events:
             with open(csv_filename, 'a') as fd:
-                row = {}
                 first = True
-                for f, v in event.items():
+                for e in self.header:
                     if not first:
                         fd.write(';')
-                    fd.write('"' + v + '"')
-                    row[f] = v
+                    fd.write('"' + event[e] + '"')
                     first = False
                 fd.write('\n')
                 fd.flush()
@@ -85,30 +99,21 @@ class XL2Command(ReportingCommand):
         csv_filename = '/data_out/insee/sirc-%s.csv' % filename
         old_csv_filename = '/data_out/insee/sirc-%s.csv' % old_filename
 
-        header = ('"SIREN";"NIC";"L1_NORMALISEE";"L2_NORMALISEE";"L3_NORMALISEE";"L4_NORMALISEE";"L5_NORMALISEE";'
-                  '"L6_NORMALISEE";"L7_NORMALISEE";"L1_DECLAREE";"L2_DECLAREE";"L3_DECLAREE";"L4_DECLAREE";'
-                  '"L5_DECLAREE";"L6_DECLAREE";"L7_DECLAREE";"NUMVOIE";"INDREP";"TYPVOIE";"LIBVOIE";"CODPOS";"CEDEX"'
-                  ';"RPET";"LIBREG";"DEPET";"ARRONET";"CTONET";"COMET";"LIBCOM";"DU";"TU";"UU";"EPCI";"TCD";"ZEMET";'
-                  '"SIEGE";"ENSEIGNE";"IND_PUBLIPO";"DIFFCOM";"AMINTRET";"NATETAB";"LIBNATETAB";"APET700";"LIBAPET";'
-                  '"DAPET";"TEFET";"LIBTEFET";"EFETCENT";"DEFET";"ORIGINE";"DCRET";"DDEBACT";"ACTIVNAT";"LIEUACT";'
-                  '"ACTISURF";"SAISONAT";"MODET";"PRODET";"PRODPART";"AUXILT";"NOMEN_LONG";"SIGLE";"NOM";"PRENOM";'
-                  '"CIVILITE";"RNA";"NICSIEGE";"RPEN";"DEPCOMEN";"ADR_MAIL";"NJ";"LIBNJ";"APEN700";"LIBAPEN";"DAPEN"'
-                  ';"APRM";"ESS";"DATEESS";"TEFEN";"LIBTEFEN";"EFENCENT";"DEFEN";"CATEGORIE";"DCREN";"AMINTREN";'
-                  '"MONOACT";"MODEN";"PRODEN";"ESAANN";"TCA";"ESAAPEN";"ESASEC1N";"ESASEC2N";"ESASEC3N";"ESASEC4N";'
-                  '"VMAJ";"VMAJ1";"VMAJ2";"VMAJ3";"DATEMAJ";"EVE";"DATEVE";"TYPCREH";"DREACTET";"DREACTEN";'
-                  '"MADRESSE";"MENSEIGNE";"MAPET";"MPRODET";"MAUXILT";"MNOMEN";"MSIGLE";"MNICSIEGE";"MNJ";"MAPEN";'
-                  '"MPRODEN";"SIRETPS";"TEL"\n')
-
-        for record in records:
+        for _ in records:
             counter = 0
             with open(old_csv_filename, 'r') as fin:
                 with open(csv_filename, 'w') as fout:
-                    fout.write(header)
+                    fout.write(self.return_header())
+                    fout.write('\n')
                     for line in fin.readlines():
                         fout.write(line)
                         counter += 1
 
             time.sleep(1)
+
+            # Delete the first CSV file
+            if os.path.exists(old_csv_filename):
+                os.remove(old_csv_filename)
 
             if self.dtr:
                 zip_filename = '/data_out/insee/' + 'sirene_' + ''.join(self.dtr.split('-')) + '.zip'
@@ -125,9 +130,9 @@ class XL2Command(ReportingCommand):
                 # Give RW to the UNIX group
                 os.chmod(zip_filename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP)
 
-                # Delete the CSV files
+                # Delete the CSV file
                 os.remove(csv_filename)
-                os.remove(old_csv_filename)
+
         yield {'file': zip_filename, 'records': counter}
 
 

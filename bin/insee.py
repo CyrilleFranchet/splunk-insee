@@ -343,7 +343,10 @@ class INSEECommand(GeneratingCommand):
             for siret in chunk:
                 q += 'siret:' + siret + ' OR '
             q = q[:-4]
-            j = self.get_siret(q=q, nombre=step, champs=champs, gzip=True)
+            try:
+                j = self.get_siret(q=q, nombre=step, champs=champs, gzip=True)
+            except ExceptionSiret:
+                continue
             try:
                 header = j['header']
                 for s in j['etablissements']:
