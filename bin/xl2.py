@@ -97,6 +97,8 @@ class XL2Command(ReportingCommand):
         yield {'dummy': 0}
 
     def reduce(self, records):
+        zip_filename = 'Not ZIP file generated. Error during creation.'
+        counter = 0s
         try:
             if self.dtr:
                 filename = self.dtr + '_' + datetime.now().strftime('%Y%m%d%H%M%S')
@@ -109,7 +111,6 @@ class XL2Command(ReportingCommand):
             old_csv_filename = '/data_out/insee/sirc-%s.csv' % old_filename
 
             for _ in records:
-                counter = 0
                 if os.path.exists(old_csv_filename):
                     with open(old_csv_filename, 'r') as fin:
                         with open(csv_filename, 'w') as fout:
@@ -142,9 +143,6 @@ class XL2Command(ReportingCommand):
 
                         # Delete the CSV file
                         os.remove(csv_filename)
-
-                else:
-                    zip_filename = 'Not ZIP file generated. Error during creation.'
 
         # This is a bad practise, but we want a specific message in log file
         # This case means that the code is missing an Exception handling
