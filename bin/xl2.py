@@ -98,7 +98,7 @@ class XL2Command(ReportingCommand):
 
     def reduce(self, records):
         zip_filename = 'Not ZIP file generated. Error during creation.'
-        counter = 0s
+        counter = 0
         try:
             if self.dtr:
                 filename = self.dtr + '_' + datetime.now().strftime('%Y%m%d%H%M%S')
