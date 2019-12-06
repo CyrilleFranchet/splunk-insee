@@ -85,6 +85,7 @@ class XL2Command(ReportingCommand):
 
             for event in events:
                 with open(csv_filename, 'a') as fd:
+                    self.logger.info('  Function map() - append in filename: %s', csv_filename.encode('utf-8'))
                     first = True
                     for e in self.header:
                         if not first:
@@ -127,6 +128,8 @@ class XL2Command(ReportingCommand):
                 if os.path.exists(old_csv_filename):
                     with open(old_csv_filename, 'r') as fin:
                         with open(csv_filename, 'w') as fout:
+                            self.logger.info('  Function reduce() - append in filename: %s',
+                                             csv_filename.encode('utf-8'))
                             fout.write(self.return_header())
                             fout.write('\n')
                             for line in fin.readlines():
@@ -138,6 +141,8 @@ class XL2Command(ReportingCommand):
                     # Delete the first CSV file
                     if os.path.exists(old_csv_filename):
                         os.remove(old_csv_filename)
+                        self.logger.info('  Function reduce() - delete filename: %s',
+                                         old_csv_filename.encode('utf-8'))
 
                     if self.dtr:
                         zip_filename = '/data_out/insee/' + 'sirene_' + ''.join(self.dtr.split('-')) + '.zip'
@@ -147,6 +152,8 @@ class XL2Command(ReportingCommand):
                     if os.path.exists(csv_filename):
                         # ZIP the file
                         with ZipFile(zip_filename, mode='w', compression=compression, allowZip64=True) as zip_file:
+                            self.logger.info('  Function reduce() - zip filename creation: %s',
+                                             zip_filename.encode('utf-8'))
                             zip_file.write(csv_filename, arcname='sirc-%s.csv' % filename)
 
                         time.sleep(1)
@@ -156,6 +163,8 @@ class XL2Command(ReportingCommand):
 
                         # Delete the CSV file
                         os.remove(csv_filename)
+                        self.logger.info('  Function reduce() - delete filename: %s',
+                                         csv_filename.encode('utf-8'))
 
         # This is a bad practise, but we want a specific message in log file
         # This case means that the code is missing an Exception handling
