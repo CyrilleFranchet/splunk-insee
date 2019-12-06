@@ -83,9 +83,13 @@ class XL2Command(ReportingCommand):
 
             csv_filename = '/data_out/insee/sirc-%s.csv' % filename
 
+            first = True
+
             for event in events:
+                if first:
+                    self.logger.info('  Function map() - handle events')
+                    first = False
                 with open(csv_filename, 'a') as fd:
-                    self.logger.info('  Function map() - append in filename: %s', csv_filename.encode('utf-8'))
                     first = True
                     for e in self.header:
                         if not first:
@@ -128,7 +132,7 @@ class XL2Command(ReportingCommand):
                 if os.path.exists(old_csv_filename):
                     with open(old_csv_filename, 'r') as fin:
                         with open(csv_filename, 'w') as fout:
-                            self.logger.info('  Function reduce() - append in filename: %s',
+                            self.logger.info('  Function reduce() - copy to filename: %s',
                                              csv_filename.encode('utf-8'))
                             fout.write(self.return_header())
                             fout.write('\n')
