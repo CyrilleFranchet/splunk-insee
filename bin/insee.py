@@ -647,9 +647,9 @@ class INSEECommand(GeneratingCommand):
                 day_to_retrieve = (date.today() - timedelta(1)).strftime('%Y-%m-%d')
 
             # Log the requested date to help debugging
-            self.logger.info('  %s', day_to_retrieve.encode('utf-8'))
+            self.logger.info('  dtr: %s', day_to_retrieve.encode('utf-8'))
             # Log the username to help debugging
-            self.logger.info('  %s', self._metadata.searchinfo.username.encode('utf-8'))
+            self.logger.info('  Splunk username: %s', self._metadata.searchinfo.username.encode('utf-8'))
 
             event = 1
             curseur = '*'
