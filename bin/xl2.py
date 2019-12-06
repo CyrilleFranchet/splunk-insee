@@ -176,7 +176,9 @@ class XL2Command(ReportingCommand):
             self.logger.error('  unhandled exception has occurred. Traceback is in splunklib.log: %s', e.message)
             raise
 
-        yield {'file': zip_filename, 'records': counter}
+        self.logger.info('  wrote %d records in file', counter)
+        
+        yield {'dtr': old_filename[:-1], 'file': zip_filename, 'records': counter}
 
 
 dispatch(XL2Command, sys.argv, sys.stdin, sys.stdout, __name__)
