@@ -177,7 +177,7 @@ class XL2Command(ReportingCommand):
             raise
 
         self.logger.info('  wrote %d records in file', counter)
-        
+
         yield {'dtr': old_filename[:-1], 'file': zip_filename, 'records': counter}
 
 
