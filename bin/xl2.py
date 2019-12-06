@@ -75,6 +75,11 @@ class XL2Command(ReportingCommand):
             else:
                 filename = (date.today() - timedelta(1)).strftime('%Y-%m-%d') + '_'
 
+            # Log the requested date to help debugging
+            self.logger.info('  Function map() - %s', filename[:-1].encode('utf-8'))
+            # Log the username to help debugging
+            self.logger.info('  Function map() - %s', self._metadata.searchinfo.username.encode('utf-8'))
+
             csv_filename = '/data_out/insee/sirc-%s.csv' % filename
 
             for event in events:
@@ -107,6 +112,12 @@ class XL2Command(ReportingCommand):
                 filename = (date.today() - timedelta(1)).strftime('%Y-%m-%d') + '_' + \
                            datetime.now().strftime('%Y%m%d%H%M%S')
                 old_filename = (date.today() - timedelta(1)).strftime('%Y-%m-%d') + '_'
+
+            # Log the requested date to help debugging
+            self.logger.info('  Function reduce() - %s', old_filename[:-1].encode('utf-8'))
+            # Log the username to help debugging
+            self.logger.info('  Function reduce() - %s', self._metadata.searchinfo.username.encode('utf-8'))
+
             csv_filename = '/data_out/insee/sirc-%s.csv' % filename
             old_csv_filename = '/data_out/insee/sirc-%s.csv' % old_filename
 
