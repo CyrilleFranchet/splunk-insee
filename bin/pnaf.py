@@ -46,7 +46,7 @@ class ExceptionDateParameter(Exception):
 
 
 @Configuration(type='events')
-class INSEECommand(GeneratingCommand):
+class PNAFCommand(GeneratingCommand):
     """ Synopsis
 
     ##Syntax
