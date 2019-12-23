@@ -499,8 +499,8 @@ class PNAFCommand(GeneratingCommand):
                 new_siret['Raison sociale'] = v(u['denominationUniteLegale'])
             new_siret['Enseigne'] = v(p['enseigne1Etablissement'])
             new_siret['Nom Prénom'] = v(u['nomUniteLegale']) + v(u['prenom1UniteLegale'])
-            new_siret['Adresse postale'] = v(a['numeroVoieEtablissement']) + v(a['typeVoieEtablissement']) +\
-                                           v(a['libelleVoieEtablissement'])
+            new_siret['Adresse postale'] = v(a['numeroVoieEtablissement']) + ' ' + v(a['typeVoieEtablissement']) +\
+                                           ' ' + v(a['libelleVoieEtablissement'])
             new_siret['Complément Adresse'] = v(a['complementAdresseEtablissement'])
             new_siret['Ville'] = v(a['libelleCommuneEtablissement'])
             new_siret['No Tél'] = ''
