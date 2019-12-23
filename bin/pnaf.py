@@ -470,15 +470,15 @@ class PNAFCommand(GeneratingCommand):
             a2 = siret['adresse2Etablissement']
             p = siret['periodesEtablissement'][0]
 
-            new_siret['Code INSEE Commune'] = v(a['codeCommuneEtablissement'])
-            new_siret['Code NAF'] = v(p['activitePrincipaleEtablissement']).replace('.', '')
-            new_siret['Libellé NAF'] = v(p['activitePrincipaleEtablissement'])
-            new_siret['Code postal'] = v(a['codePostalEtablissement'])
-            new_siret['No Siren'] = v(siret['siren'])
-            new_siret['Connu Siren'] = ''
-            new_siret['No Siret'] = v(siret['siren'])
-            new_siret['Connu Siret'] = ''
-            new_siret['Date de création établissement'] = datetime.strptime(v(siret['dateCreationEtablissement']),
+            new_siret['Code_INSEE_Commune'] = v(a['codeCommuneEtablissement'])
+            new_siret['Code_NAF'] = v(p['activitePrincipaleEtablissement']).replace('.', '')
+            new_siret['Libellé_NAF'] = v(p['activitePrincipaleEtablissement'])
+            new_siret['Code_postal'] = v(a['codePostalEtablissement'])
+            new_siret['No_Siren'] = v(siret['siren'])
+            new_siret['Connu_Siren'] = ''
+            new_siret['No_Siret'] = v(siret['siren'])
+            new_siret['Connu_Siret'] = ''
+            new_siret['Date_de_création_établissement'] = datetime.strptime(v(siret['dateCreationEtablissement']),
                                                                             '%Y-%m-%d').strftime('%d/%m/%Y')
             # Physical person
             sul = None
@@ -494,17 +494,17 @@ class PNAFCommand(GeneratingCommand):
                 else:
                     nul = v(u['nomUniteLegale'])
                 puul = v(u['prenomUsuelUniteLegale'])
-                new_siret['Raison sociale'] = ' '.join(filter(None, [sul, puul, nul]))
+                new_siret['Raison_sociale'] = ' '.join(filter(None, [sul, puul, nul]))
             else:
-                new_siret['Raison sociale'] = v(u['denominationUniteLegale'])
+                new_siret['Raison_sociale'] = v(u['denominationUniteLegale'])
             new_siret['Enseigne'] = v(p['enseigne1Etablissement'])
-            new_siret['Nom Prénom'] = v(u['nomUniteLegale']) + v(u['prenom1UniteLegale'])
-            new_siret['Adresse postale'] = v(a['numeroVoieEtablissement']) + ' ' + v(a['typeVoieEtablissement']) +\
+            new_siret['Nom_Prénom'] = v(u['nomUniteLegale']) + v(u['prenom1UniteLegale'])
+            new_siret['Adresse_postale'] = v(a['numeroVoieEtablissement']) + ' ' + v(a['typeVoieEtablissement']) +\
                                            ' ' + v(a['libelleVoieEtablissement'])
-            new_siret['Complément Adresse'] = v(a['complementAdresseEtablissement'])
+            new_siret['Complément_Adresse'] = v(a['complementAdresseEtablissement'])
             new_siret['Ville'] = v(a['libelleCommuneEtablissement'])
-            new_siret['No Tél'] = ''
-            new_siret['Statut diffusion'] = 'O'.encode('utf-8')
+            new_siret['No_Tél'] = ''
+            new_siret['Statut_diffusion'] = 'O'.encode('utf-8')
 
         except KeyError as e:
             self.logger.error('  missing key in siret received from API: %s', e)
