@@ -513,7 +513,7 @@ class PNAFCommand(GeneratingCommand):
                 self.logger.debug('  new_siret object: %s', new_siret)
             raise ExceptionTranslation('Error during siret translation')
 
-        raw = ''.join(k + '=' + '\"{0}\"'.format(v) + ' ' for k, v in new_siret.items())
+        raw = ''.join(k + '=' + '{0}'.format(v) + ' ' for k, v in new_siret.items())
         return raw
 
     def generate(self):
