@@ -476,7 +476,7 @@ class PNAFCommand(GeneratingCommand):
             new_siret['Code_postal'] = v(a['codePostalEtablissement'])
             new_siret['No_Siren'] = v(siret['siren'])
             new_siret['Connu_Siren'] = ''
-            new_siret['No_Siret'] = v(siret['siren'])
+            new_siret['No_Siret'] = v(siret['siret'])
             new_siret['Connu_Siret'] = ''
             new_siret['Date_de_création_établissement'] = datetime.strptime(v(siret['dateCreationEtablissement']),
                                                                             '%Y-%m-%d').strftime('%d/%m/%Y')

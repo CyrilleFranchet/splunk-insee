@@ -5,6 +5,9 @@ Les anciens fichiers XL2 contenaient les mises à jour journalières fournies pa
 # Fonctionnement de l'application
 L’application INSEE fournit deux nouvelles « custom commands » aux utilisateurs de l’application Splunk.
 
+## Commande pnaf
+```| pnaf | extract limit=200 maxchars=100000 | lookup csv_naf ID as Libellé_NAF output LIBELLE as Libellé_NAF | fields - _kv,_raw,_time,event_no | fields "Code_INSEE_Commune","Code_NAF","Libellé_NAF","Code_postal","No_Siren","Connu_Siren","No_Siret","Connu_Siret","Date_de_création_établissement","Raison_sociale",Enseigne,"Nom_Prénom","Adresse_postale","Complément_Adresse",Ville,"No_Tél","Statut_diffusion" | rename "Code_INSEE_Commune" AS "Code INSEE Commune" "Code_NAF" AS "Code NAF" "Libellé_NAF" AS "Libellé NAF" "Code_postal" AS "Code postal" "No_Siren" AS "No Siren" "Connu_Siren" AS "Connu Siren" "No_Siret" AS "No Siret" "Connu_Siret" AS "Connu Siret" "Date_de_création_établissement" AS "Date de création établissement" "Raison_sociale" AS "Raison sociale" "Nom_Prénom" AS "Nom Prénom" "Adresse_postale" AS "Adresse postale" "Complément_Adresse" AS "Complément Adresse" "No_Tél" AS "No Tél" "Statut_diffusion" AS "Statut diffusion" | outputcsv [ stats count | eval time=strftime(now(), "%d%m%Y%H%M%S") | fields username time | eval csvnm = "INSEE_PROSPECTS_NAF_" +toString(time) | return $csvnm]```
+
 ## Commande insee
 Commande génératrice d’événements qui interroge l’API SIRENE pour obtenir les établissements qui ont été modifiés à une date donnée.
 
